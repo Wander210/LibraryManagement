@@ -1,7 +1,6 @@
 package com.example.library.library_service.service
 
 import com.example.library.library_service.dto.DefectDetailDto
-import com.example.library.library_service.dto.DefectViewDto
 import com.example.library.library_service.entity.DefectStatus
 import com.example.library.library_service.repository.DefectRepository
 import com.example.library.library_service.repository.PhotoUrlRepository
@@ -14,39 +13,26 @@ class DefectService (
     private val defectRepository: DefectRepository,
     private val photoUrlRepository: PhotoUrlRepository
 ) {
-    fun findAllDefectsForView(): List<DefectViewDto> =
+    fun findAllDefectsForView(): List<DefectDetailDto> =
         defectRepository.findAllDefectsForView()
 
-    fun findAllDefectsByBookId(bookId: String): List<DefectViewDto> =
+    fun findAllDefectsByBookId(bookId: String): List<DefectDetailDto> =
         defectRepository.findAllDefectsByBookId(bookId)
 
-    fun findAllDefectsByBorrowRecordId(borrowRecordId: String): List<DefectViewDto> =
+    fun findAllDefectsByBorrowRecordId(borrowRecordId: String): List<DefectDetailDto> =
         defectRepository.findAllDefectsByBorrowRecordId(borrowRecordId)
 
-    fun findAllDefectsById(id: String): DefectViewDto =
+    fun findAllDefectsById(id: String): DefectDetailDto =
         defectRepository.findAllDefectsById(id)
 
     fun findDefectDetailById(id: String): DefectDetailDto {
         val dto = defectRepository.findAllDefectsById(id)
         val photos = photoUrlRepository.findByDefectId(id).map { it.url }
-        return DefectDetailDto(
-            defectId = dto.defectId,
-            defectStatus = dto.defectStatus,
-            defectSeverity = dto.defectSeverity,
-            defectFee = dto.defectFee,
-            defectReason = dto.defectReason,
-            createAt = dto.createAt,
-            resolvedDate = dto.resolvedDate,
-            borrowRecordId = dto.borrowRecordId,
-            readerName = dto.readerName,
-            bookId = dto.bookId,
-            bookTitle = dto.bookTitle,
-            photoUrls = photos
-        )
+        return dto.copy(photoUrls = photos)
     }
 
     @Transactional
-    fun updateDefectStatus(defectId: String, newStatus: DefectStatus): DefectViewDto {
+    fun updateDefectStatus(defectId: String, newStatus: DefectStatus): DefectDetailDto {
         val defect = defectRepository.findById(defectId)
             .orElseThrow { IllegalArgumentException("Defect not found with id: $defectId") }
 

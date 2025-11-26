@@ -322,8 +322,8 @@
     <div class="header">
         <h1>Hệ Thống Quản Lý Thư Viện</h1>
         <div class="user-info">
-            <div>Người Văn A</div>
-            <div>Thủ thư viên</div>
+            <div>Nguyễn Văn A</div>
+            <div>Thủ thư</div>
             <div id="currentDate"></div>
         </div>
     </div>
@@ -411,9 +411,9 @@
 
     function getSeverityText(severity) {
         const texts = {
-            'HIGH': 'Cao',
-            'MEDIUM': 'Trung bình',
-            'LOW': 'Thấp'
+            'HIGH': 'Cao - Cần xử lý ngay',
+            'MEDIUM': 'Trung bình - Cần xử lý trong vòng hợp lý',
+            'LOW': 'Thấp - Ưu tiên thấp'
         };
         return texts[severity] || severity;
     }
@@ -553,9 +553,6 @@
                     <span class="status-badge ${getSeverityClass(defect.defectSeverity)}">
                         ${getSeverityText(defect.defectSeverity)}
                     </span>
-                    <span style="margin-left: 15px;">
-                        Nhu - Cố thể sửa chữa đã dễ dàng
-                    </span>
                 </div>
             </div>
 
@@ -598,7 +595,7 @@
             <div class="info-section">
                 <div class="section-title">Lý do hư hỏng</div>
                 <div class="info-value">
-                    Mô tả chi tiết tình trạng hư hỏng của sách
+                    ${escapeHtml(defect.defectReason || 'N/A')}
                 </div>
             </div>
         `;

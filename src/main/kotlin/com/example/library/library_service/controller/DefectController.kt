@@ -1,7 +1,6 @@
 package com.example.library.library_service.controller
 
 import com.example.library.library_service.dto.DefectDetailDto
-import com.example.library.library_service.dto.DefectViewDto
 import com.example.library.library_service.dto.UpdateDefectStatusRequest
 import com.example.library.library_service.service.DefectService
 import org.springframework.http.ResponseEntity
@@ -18,17 +17,17 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin(origins = ["*"])
 class DefectController(private val defectService: DefectService) {
     @GetMapping("/defect")
-    fun listDefectsApi(): ResponseEntity<List<DefectViewDto>> {
+    fun listDefectsApi(): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsForView())
     }
 
     @GetMapping("/defect/book/{bookId}")
-    fun listDefectsByBookIdApi(@PathVariable bookId: String): ResponseEntity<List<DefectViewDto>> {
+    fun listDefectsByBookIdApi(@PathVariable bookId: String): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsByBookId(bookId))
     }
 
     @GetMapping("/defect/borrowRecord/{borrowRecordId}")
-    fun listDefectsByBorrowRecordIdApi(@PathVariable borrowRecordId: String): ResponseEntity<List<DefectViewDto>> {
+    fun listDefectsByBorrowRecordIdApi(@PathVariable borrowRecordId: String): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsByBorrowRecordId(borrowRecordId))
     }
 
@@ -41,7 +40,7 @@ class DefectController(private val defectService: DefectService) {
     fun updateDefectStatus(
         @PathVariable id: String,
         @RequestBody request: UpdateDefectStatusRequest
-    ): ResponseEntity<DefectViewDto> {
+    ): ResponseEntity<DefectDetailDto> {
         return ResponseEntity.ok(defectService.updateDefectStatus(id, request.status))
     }
 }

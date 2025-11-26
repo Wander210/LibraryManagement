@@ -1,6 +1,6 @@
 package com.example.library.library_service.repository
 
-import com.example.library.library_service.dto.DefectViewDto
+import com.example.library.library_service.dto.DefectDetailDto
 import com.example.library.library_service.entity.Defect
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface DefectRepository : JpaRepository<Defect, String> {
     @Query(
         """
-      SELECT new com.example.library.library_service.dto.DefectViewDto(
+      SELECT new com.example.library.library_service.dto.DefectDetailDto(
         d.id, d.status, d.severity, d.defectFee, d.defectReason, d.createdAt, d.resolvedDate,
         br.id,
         u.fullName,
@@ -25,11 +25,11 @@ interface DefectRepository : JpaRepository<Defect, String> {
       ORDER BY d.createdAt DESC
       """
     )
-    fun findAllDefectsForView(): List<DefectViewDto>
+    fun findAllDefectsForView(): List<DefectDetailDto>
 
     @Query(
         """
-      SELECT new com.example.library.library_service.dto.DefectViewDto(
+      SELECT new com.example.library.library_service.dto.DefectDetailDto(
         d.id, d.status, d.severity, d.defectFee, d.defectReason, d.createdAt, d.resolvedDate,
         br.id,
         u.fullName,
@@ -44,11 +44,11 @@ interface DefectRepository : JpaRepository<Defect, String> {
       ORDER BY d.createdAt DESC
       """
     )
-    fun findAllDefectsByBookId(bookId: String): List<DefectViewDto>
+    fun findAllDefectsByBookId(bookId: String): List<DefectDetailDto>
 
     @Query(
         """
-      SELECT new com.example.library.library_service.dto.DefectViewDto(
+      SELECT new com.example.library.library_service.dto.DefectDetailDto(
         d.id, d.status, d.severity, d.defectFee, d.defectReason, d.createdAt, d.resolvedDate,
         br.id,
         u.fullName,
@@ -63,11 +63,11 @@ interface DefectRepository : JpaRepository<Defect, String> {
       ORDER BY d.createdAt DESC
       """
     )
-    fun findAllDefectsByBorrowRecordId(borrowRecordId: String): List<DefectViewDto>
+    fun findAllDefectsByBorrowRecordId(borrowRecordId: String): List<DefectDetailDto>
 
     @Query(
         """
-      SELECT new com.example.library.library_service.dto.DefectViewDto(
+      SELECT new com.example.library.library_service.dto.DefectDetailDto(
         d.id, d.status, d.severity, d.defectFee, d.defectReason, d.createdAt, d.resolvedDate,
         br.id,
         u.fullName,
@@ -82,5 +82,5 @@ interface DefectRepository : JpaRepository<Defect, String> {
       ORDER BY d.createdAt DESC
       """
     )
-    fun findAllDefectsById(id: String): DefectViewDto
+    fun findAllDefectsById(id: String): DefectDetailDto
 }
