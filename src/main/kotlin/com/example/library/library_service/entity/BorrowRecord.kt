@@ -1,4 +1,4 @@
-package com.example.library.library_service.model
+package com.example.library.library_service.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
@@ -9,11 +9,13 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Entity
+@Table(name = "BorrowRecord")
 class BorrowRecord(
     @Id
     @Column

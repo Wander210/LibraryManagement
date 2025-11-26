@@ -1,4 +1,4 @@
-package com.example.library.library_service.model
+package com.example.library.library_service.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
@@ -8,22 +8,23 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.Lob
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import java.time.LocalDateTime
 
 @Entity
+@Table(name = "Book")
 class Book(
     @Id
-    @Column(length = 255)
+    @Column
     var id: String = "",
-    @Column(length = 500)
+    @Column
     var title: String = "",
     var category: String = "",
     var author: String = "",
     var publisher: String = "",
     @Column(name = "publication_year")
     var publicationYear: Int = 0,
-    @Lob
     var description: String = "",
     @Column(name = "available_copies")
     var availableCopies: Int = 0,
@@ -35,10 +36,10 @@ class Book(
 ) {
     @OneToMany(mappedBy = "book", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
-    open var photoUrls: MutableList<PhotoUrl> = mutableListOf()
+    var photoUrls: MutableList<PhotoUrl> = mutableListOf()
 
 
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     @JsonIgnore
-    open var borrowBookItems: MutableList<BorrowBook> = mutableListOf()
+    var borrowBookItems: MutableList<BorrowBook> = mutableListOf()
 }

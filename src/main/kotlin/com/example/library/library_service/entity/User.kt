@@ -1,4 +1,4 @@
-package com.example.library.library_service.model
+package com.example.library.library_service.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.CascadeType
@@ -7,11 +7,13 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.hibernate.annotations.CreationTimestamp
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
+@Table(name = "User")
 class User(
     @Id
     @Column

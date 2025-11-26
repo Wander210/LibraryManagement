@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .search-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .search-btn:hover {
+            background: #0056b3;
+        }
+
+        .search-type {
+            position: relative;
+        }
+
+        .search-type-btn {
+            padding: 10px 16px;
+            background: white;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .search-type-btn::after {
+            content: '▾';
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .search-type-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            display: none;
+            flex-direction: column;
+            min-width: 200px;
+            z-index: 10;
+        }
+
+        .search-type.open .search-type-menu {
+            display: flex;
+        }
+
+        .search-type-option {
+            padding: 10px 14px;
+            background: white;
+            border: none;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .search-type-option:hover {
+            background: #f1f3f5;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            padding: 15px 20px;
+            border-radius: 6px;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .stat-card.total {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .stat-card.reported {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .stat-card.in-repair {
+            background: #fffde7;
+            color: #f9a825;
+        }
+
+        .stat-card.repaired {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .filter-tab:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-reported {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-in-repair {
+            background: #fffde7;
+            color: #f9a825;
+        }
+
+        .status-repaired {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .severity-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .severity-medium {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .severity-low {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            padding: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .page-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .page-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Người Văn A</div>
+            <div>Thủ thư viên</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab">Nhập sách ra</button>
+        <button class="tab active">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="search-section">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Nhập mã sách...">
+            <div class="search-type" id="searchTypeWrapper">
+                <button type="button" id="searchTypeBtn" class="search-type-btn">Mã sách</button>
+                <div class="search-type-menu" id="searchTypeMenu">
+                    <button type="button" class="search-type-option" data-type="BOOK_ID">Mã sách</button>
+                    <button type="button" class="search-type-option" data-type="BORROWER_ID">Mã mượn</button>
+                    <button type="button" class="search-type-option" data-type="DEFECT_ID">Mã lỗi</button>
+                </div>
+            </div>
+            <button id="searchBtn" class="search-btn" type="button">Tìm kiếm</button>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card total">
+            <div class="label">Tất cả</div>
+            <div class="value" id="totalCount">0</div>
+        </div>
+        <div class="stat-card reported">
+            <div class="label">Đã báo cáo</div>
+            <div class="value" id="reportedCount">0</div>
+        </div>
+        <div class="stat-card in-repair">
+            <div class="label">Đang sửa chữa</div>
+            <div class="value" id="inRepairCount">0</div>
+        </div>
+        <div class="stat-card repaired">
+            <div class="label">Đã sửa chữa</div>
+            <div class="value" id="repairedCount">0</div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" data-status="ALL">Tất cả</button>
+            <button class="filter-tab" data-status="REPORTED">Đã báo cáo</button>
+            <button class="filter-tab" data-status="IN_REPAIR">Đang sửa chữa</button>
+            <button class="filter-tab" data-status="REPAIRED">Đã sửa chữa</button>
+        </div>
+
+        <div id="tableContainer">
+            <div class="loading">Đang tải dữ liệu...</div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080',
+        ITEMS_PER_PAGE: 10
+    };
+
+    const normalizeText = (value) => (value ?? '').toString().toLowerCase();
+
+    const SEARCH_OPTIONS = {
+        BOOK_ID: {
+            label: 'Mã sách',
+            placeholder: 'Nhập mã sách...',
+            matcher: (defect, term) =>
+                normalizeText(defect.bookId).includes(term)
+        },
+        BORROWER_ID: {
+            label: 'Mã mượn',
+            placeholder: 'Nhập Mã mượn...',
+            matcher: (defect, term) =>
+                normalizeText(defect.borrowRecordId).includes(term)
+        },
+        DEFECT_ID: {
+            label: 'Mã lỗi',
+            placeholder: 'Nhập mã lỗi...',
+            matcher: (defect, term) =>
+                normalizeText(defect.defectId).includes(term)
+        }
+    };
+
+    const DEFAULT_SEARCH_TYPE = 'BOOK_ID';
+
+    // ==================== MODEL ====================
+    class DefectModel {
+        constructor() {
+            this.defects = [];
+            this.filteredDefects = [];
+            this.currentFilter = 'ALL';
+            this.currentPage = 1;
+            this.searchTerm = '';
+            this.searchField = DEFAULT_SEARCH_TYPE;
+        }
+
+        setDefects(defects) {
+            this.defects = defects;
+            this.applyFilters();
+        }
+
+        setFilter(filter) {
+            this.currentFilter = filter;
+            this.currentPage = 1;
+            this.applyFilters();
+        }
+
+        setSearchTerm(term) {
+            this.searchTerm = term.trim().toLowerCase();
+            this.currentPage = 1;
+            this.applyFilters();
+        }
+
+        setSearchField(field) {
+            if (!SEARCH_OPTIONS[field]) {
+                return;
+            }
+            this.searchField = field;
+            this.currentPage = 1;
+            this.applyFilters();
+        }
+
+        setPage(page) {
+            this.currentPage = page;
+        }
+
+        applyFilters() {
+            let result = this.defects;
+
+            // Filter by status
+            if (this.currentFilter !== 'ALL') {
+                result = result.filter(d => d.defectStatus === this.currentFilter);
+            }
+
+            // Filter by search term
+            if (this.searchTerm) {
+                const matcher = SEARCH_OPTIONS[this.searchField]?.matcher;
+                if (matcher) {
+                    result = result.filter(d => matcher(d, this.searchTerm));
+                }
+            }
+
+            this.filteredDefects = result;
+        }
+
+        getStats() {
+            return {
+                total: this.defects.length,
+                reported: this.defects.filter(d => d.defectStatus === 'REPORTED').length,
+                inRepair: this.defects.filter(d => d.defectStatus === 'IN_REPAIR').length,
+                repaired: this.defects.filter(d => d.defectStatus === 'REPAIRED').length
+            };
+        }
+
+        getPageData() {
+            const start = (this.currentPage - 1) * CONFIG.ITEMS_PER_PAGE;
+            const end = start + CONFIG.ITEMS_PER_PAGE;
+            return this.filteredDefects.slice(start, end);
+        }
+
+        getTotalPages() {
+            return Math.ceil(this.filteredDefects.length / CONFIG.ITEMS_PER_PAGE);
+        }
+    }
+
+    // ==================== VIEW ====================
+    class DefectView {
+        constructor() {
+            this.elements = {
+                currentDate: document.getElementById('currentDate'),
+                searchInput: document.getElementById('searchInput'),
+                searchBtn: document.getElementById('searchBtn'),
+                searchTypeBtn: document.getElementById('searchTypeBtn'),
+                searchTypeMenu: document.getElementById('searchTypeMenu'),
+                searchTypeWrapper: document.getElementById('searchTypeWrapper'),
+                filterTabs: document.getElementById('filterTabs'),
+                tableContainer: document.getElementById('tableContainer'),
+                pagination: document.getElementById('pagination'),
+                totalCount: document.getElementById('totalCount'),
+                reportedCount: document.getElementById('reportedCount'),
+                inRepairCount: document.getElementById('inRepairCount'),
+                repairedCount: document.getElementById('repairedCount')
+            };
+        }
+
+        renderDate() {
+            const today = new Date();
+            this.elements.currentDate.textContent = today.toLocaleDateString('vi-VN');
+        }
+
+        renderStats(stats) {
+            this.elements.totalCount.textContent = stats.total;
+            this.elements.reportedCount.textContent = stats.reported;
+            this.elements.inRepairCount.textContent = stats.inRepair;
+            this.elements.repairedCount.textContent = stats.repaired;
+        }
+
+        renderTable(defects) {
+            if (defects.length === 0) {
+                this.elements.tableContainer.innerHTML = '<div class="loading">Không có dữ liệu</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã Lỗi</th>
+                            <th>Mã mượn</th>
+                            <th>Mã sách</th>
+                            <th>Tên sách</th>
+                            <th>Người mượn</th>
+                            <th>Ngày báo cáo</th>
+                            <th>Trạng thái</th>
+                            <th>Mức độ</th>
+                            <th>Tiền phạt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${defects.map(defect => this.renderTableRow(defect)).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            this.elements.tableContainer.innerHTML = tableHTML;
+        }
+
+        renderTableRow(defect) {
+            return `
+                <tr class="clickable-row" data-defect-id="${this.escapeHtml(defect.defectId)}">
+                    <td>${this.escapeHtml(defect.defectId)}</td>
+                    <td>${this.escapeHtml(defect.borrowRecordId)}</td>
+                    <td>${this.escapeHtml(defect.bookId)}</td>
+                    <td>${this.escapeHtml(defect.bookTitle)}</td>
+                    <td>${this.escapeHtml(defect.readerName)}</td>
+                    <td>${this.formatDateTime(defect.createAt)}</td>
+                    <td><span class="status-badge ${this.getStatusClass(defect.defectStatus)}">${this.getStatusText(defect.defectStatus)}</span></td>
+                    <td><span class="status-badge ${this.getSeverityClass(defect.defectSeverity)}">${this.getSeverityText(defect.defectSeverity)}</span></td>
+                    <td>${this.formatCurrency(defect.defectFee)}</td>
+                </tr>
+            `;
+        }
+
+        renderPagination(currentPage, totalPages) {
+            if (totalPages <= 1) {
+                this.elements.pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `
+                        <button class="page-btn ${i === currentPage ? 'active' : ''}"
+                                data-page="${i}">${i}</button>
+                    `;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += '<span style="padding: 8px;">...</span>';
+                }
+            }
+
+            this.elements.pagination.innerHTML = paginationHTML;
+        }
+
+        renderLoading() {
+            this.elements.tableContainer.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
+        }
+
+        renderError(message) {
+            this.elements.tableContainer.innerHTML = `<div class="error">${this.escapeHtml(message)}</div>`;
+        }
+
+        updateSearchType(option) {
+            if (!option) {
+                return;
+            }
+            this.elements.searchTypeBtn.textContent = option.label;
+            this.elements.searchInput.placeholder = option.placeholder;
+        }
+
+        toggleSearchMenu() {
+            this.elements.searchTypeWrapper.classList.toggle('open');
+        }
+
+        closeSearchMenu() {
+            this.elements.searchTypeWrapper.classList.remove('open');
+        }
+
+        updateFilterTab(status) {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.status === status);
+            });
+        }
+
+        // Helper methods
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        formatDateTime(dateTime) {
+            const date = new Date(dateTime);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        getStatusClass(status) {
+            const classes = {
+                'REPORTED': 'status-reported',
+                'IN_REPAIR': 'status-in-repair',
+                'REPAIRED': 'status-repaired'
+            };
+            return classes[status] || '';
+        }
+
+        getStatusText(status) {
+            const texts = {
+                'REPORTED': 'Đã báo cáo',
+                'IN_REPAIR': 'Đang sửa chữa',
+                'REPAIRED': 'Đã sửa chữa'
+            };
+            return texts[status] || status;
+        }
+
+        getSeverityClass(severity) {
+            const classes = {
+                'HIGH': 'severity-high',
+                'MEDIUM': 'severity-medium',
+                'LOW': 'severity-low'
+            };
+            return classes[severity] || '';
+        }
+
+        getSeverityText(severity) {
+            const texts = {
+                'HIGH': 'Cao',
+                'MEDIUM': 'Trung bình',
+                'LOW': 'Thấp'
+            };
+            return texts[severity] || severity;
+        }
+    }
+
+    // ==================== CONTROLLER ====================
+    class DefectController {
+        constructor(model, view) {
+            this.model = model;
+            this.view = view;
+            this.init();
+        }
+
+        async init() {
+            this.view.renderDate();
+            this.view.updateSearchType(SEARCH_OPTIONS[this.model.searchField]);
+            this.setupEventListeners();
+            await this.loadDefects();
+        }
+
+        setupEventListeners() {
+            // Search button
+            this.view.elements.searchBtn.addEventListener('click', () => {
+                this.handleSearch();
+            });
+
+            // Search on Enter
+            this.view.elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch();
+                }
+            });
+
+            // Search type toggler
+            this.view.elements.searchTypeBtn.addEventListener('click', () => {
+                this.view.toggleSearchMenu();
+            });
+
+            this.view.elements.searchTypeMenu.addEventListener('click', (e) => {
+                if (e.target.classList.contains('search-type-option')) {
+                    this.handleSearchTypeChange(e.target.dataset.type);
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!this.view.elements.searchTypeWrapper.contains(e.target)) {
+                    this.view.closeSearchMenu();
+                }
+            });
+
+            // Filter tabs
+            this.view.elements.filterTabs.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-tab')) {
+                    this.handleFilterChange(e.target.dataset.status);
+                }
+            });
+
+            // Pagination
+            this.view.elements.pagination.addEventListener('click', (e) => {
+                if (e.target.classList.contains('page-btn')) {
+                    this.handlePageChange(parseInt(e.target.dataset.page));
+                }
+            });
+
+            this.view.elements.tableContainer.addEventListener('click', (e) => {
+                const row = e.target.closest('.clickable-row');
+                const defectId = row?.dataset?.defectId;
+                if (defectId) {
+                    window.location.href = `Defect.html?id=${encodeURIComponent(defectId)}`;
+                }
+            });
+        }
+
+        async loadDefects() {
+            try {
+                this.view.renderLoading();
+                const defects = await this.fetchDefects();
+                this.model.setDefects(defects);
+                this.render();
+            } catch (error) {
+                console.error('Error loading defects:', error);
+                this.view.renderError('Không thể tải dữ liệu. Vui lòng kiểm tra kết nối API.');
+            }
+        }
+
+        async fetchDefects() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/defect`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error(`API Error: ${response.status} - ${errorText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra API đang chạy.');
+                }
+                throw error;
+            }
+        }
+
+        handleSearch() {
+            const searchTerm = this.view.elements.searchInput.value;
+            this.model.setSearchTerm(searchTerm);
+            this.render();
+        }
+
+        handleSearchTypeChange(type) {
+            if (!SEARCH_OPTIONS[type]) {
+                return;
+            }
+            this.model.setSearchField(type);
+            this.view.updateSearchType(SEARCH_OPTIONS[type]);
+            this.view.closeSearchMenu();
+            this.handleSearch();
+        }
+
+        handleFilterChange(status) {
+            this.model.setFilter(status);
+            this.view.updateFilterTab(status);
+            this.render();
+        }
+
+        handlePageChange(page) {
+            this.model.setPage(page);
+            this.render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        render() {
+            this.view.renderStats(this.model.getStats());
+            this.view.renderTable(this.model.getPageData());
+            this.view.renderPagination(this.model.currentPage, this.model.getTotalPages());
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const model = new DefectModel();
+        const view = new DefectView();
+        const controller = new DefectController(model, view);
+    });
+</script>
+</body>
+</html>

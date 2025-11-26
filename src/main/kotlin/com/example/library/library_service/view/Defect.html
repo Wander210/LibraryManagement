@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Lỗi Hỏng Sách</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #495057;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: #f8f9fa;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            min-width: 150px;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #212529;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .image-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .severity-section {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #f57c00;
+        }
+
+        .severity-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f57c00;
+            margin-bottom: 10px;
+        }
+
+        .severity-text {
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-reported {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-in-repair {
+            background: #fffde7;
+            color: #f9a825;
+        }
+
+        .status-repaired {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .severity-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .severity-medium {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .severity-low {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .action-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-update {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-update:hover {
+            background: #0056b3;
+        }
+
+        .btn-update:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status-dropdown {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #dc3545;
+            font-size: 16px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Người Văn A</div>
+            <div>Thủ thư viên</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab">Nhập sách ra</button>
+        <button class="tab active">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="content">
+        <button class="back-button" onclick="goBack()">
+            ← Quay lại danh sách
+        </button>
+
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+
+        <div id="contentContainer">
+            <div class="loading">Đang tải dữ liệu...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080'
+    };
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function getDefectIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
+
+    function goBack() {
+        window.location.href = 'ManageDefect.html';
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDateTime(dateTime) {
+        const date = new Date(dateTime);
+        return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN');
+    }
+
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    }
+
+    function getStatusClass(status) {
+        const classes = {
+            'REPORTED': 'status-reported',
+            'IN_REPAIR': 'status-in-repair',
+            'REPAIRED': 'status-repaired'
+        };
+        return classes[status] || '';
+    }
+
+    function getStatusText(status) {
+        const texts = {
+            'REPORTED': 'Đã báo cáo',
+            'IN_REPAIR': 'Đang sửa chữa',
+            'REPAIRED': 'Đã sửa chữa'
+        };
+        return texts[status] || status;
+    }
+
+    function getSeverityClass(severity) {
+        const classes = {
+            'HIGH': 'severity-high',
+            'MEDIUM': 'severity-medium',
+            'LOW': 'severity-low'
+        };
+        return classes[severity] || '';
+    }
+
+    function getSeverityText(severity) {
+        const texts = {
+            'HIGH': 'Cao',
+            'MEDIUM': 'Trung bình',
+            'LOW': 'Thấp'
+        };
+        return texts[severity] || severity;
+    }
+
+    function showMessage(type, message) {
+        const successEl = document.getElementById('successMessage');
+        const errorEl = document.getElementById('errorMessage');
+
+        successEl.style.display = 'none';
+        errorEl.style.display = 'none';
+
+        if (type === 'success') {
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+        } else {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        setTimeout(() => {
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+        }, 5000);
+    }
+
+    // ==================== API FUNCTIONS ====================
+    async function fetchDefectDetail(defectId) {
+        try {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/defect/id/${defectId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            throw error;
+        }
+    }
+
+    async function updateDefectStatus(defectId, newStatus) {
+        try {
+            // Bạn cần thêm endpoint update vào controller
+            // Ví dụ: PUT /api/defect/{id}/status
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/defect/${defectId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Update Error:', error);
+            throw error;
+        }
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderDefectDetail(defect) {
+        const contentContainer = document.getElementById('contentContainer');
+
+        const html = `
+            <div class="detail-grid">
+                <div>
+                    <div class="info-section">
+                        <div class="section-title">Thông tin sách mượn</div>
+                        <div class="info-row">
+                            <div class="info-label">Mã mượn:</div>
+                            <div class="info-value">${escapeHtml(defect.borrowRecordId || 'N/A')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Người mượn:</div>
+                            <div class="info-value">${escapeHtml(defect.readerName || 'N/A')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Ngày mượn:</div>
+                            <div class="info-value">${formatDateTime(defect.createAt)}</div>
+                        </div>
+                    </div>
+
+                    <div class="info-section" style="margin-top: 20px;">
+                        <div class="section-title">Thông tin sách</div>
+                        <div class="info-row">
+                            <div class="info-label">Mã sách:</div>
+                            <div class="info-value">${escapeHtml(defect.bookId || 'N/A')}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Tên sách:</div>
+                            <div class="info-value">${escapeHtml(defect.bookTitle || 'N/A')}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-section">
+                    <div class="section-title">Ảnh</div>
+                    <div class="image-placeholder">
+                        Chưa có ảnh minh họa
+                    </div>
+                </div>
+            </div>
+
+            <div class="severity-section">
+                <div class="severity-title">Mức độ nghiêm trọng</div>
+                <div class="severity-text">
+                    <span class="status-badge ${getSeverityClass(defect.defectSeverity)}">
+                        ${getSeverityText(defect.defectSeverity)}
+                    </span>
+                    <span style="margin-left: 15px;">
+                        Nhu - Cố thể sửa chữa đã dễ dàng
+                    </span>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <div class="section-title">Trạng thái xử lí</div>
+                <div class="info-row">
+                    <div class="info-label">Trạng thái hiện tại:</div>
+                    <div class="info-value">
+                        <span class="status-badge ${getStatusClass(defect.defectStatus)}">
+                            ${getStatusText(defect.defectStatus)}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Tiền phạt:</div>
+                    <div class="info-value" style="font-weight: 600; color: #dc3545;">
+                        ${formatCurrency(defect.defectFee || 0)}
+                    </div>
+                </div>
+
+                <select id="statusSelect" class="status-dropdown">
+                    <option value="REPORTED" ${defect.defectStatus === 'REPORTED' ? 'selected' : ''}>
+                        Đã báo cáo
+                    </option>
+                    <option value="IN_REPAIR" ${defect.defectStatus === 'IN_REPAIR' ? 'selected' : ''}>
+                        Đang sửa chữa
+                    </option>
+                    <option value="REPAIRED" ${defect.defectStatus === 'REPAIRED' ? 'selected' : ''}>
+                        Đã sửa chữa
+                    </option>
+                </select>
+
+                <div class="action-buttons">
+                    <button id="updateBtn" class="action-btn btn-update">
+                        Cập nhập
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="section-title">Lý do hư hỏng</div>
+                <div class="info-value">
+                    Mô tả chi tiết tình trạng hư hỏng của sách
+                </div>
+            </div>
+        `;
+
+        contentContainer.innerHTML = html;
+
+        // Setup event listener for update button
+        document.getElementById('updateBtn').addEventListener('click', () => {
+            handleStatusUpdate(defect.defectId);
+        });
+    }
+
+    function renderLoading() {
+        const contentContainer = document.getElementById('contentContainer');
+        contentContainer.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
+    }
+
+    function renderError(message) {
+        const contentContainer = document.getElementById('contentContainer');
+        contentContainer.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+    }
+
+    // ==================== EVENT HANDLERS ====================
+    async function handleStatusUpdate(defectId) {
+        const statusSelect = document.getElementById('statusSelect');
+        const updateBtn = document.getElementById('updateBtn');
+        const newStatus = statusSelect.value;
+
+        try {
+            updateBtn.disabled = true;
+            updateBtn.textContent = 'Đang cập nhật...';
+
+            await updateDefectStatus(defectId, newStatus);
+
+            showMessage('success', 'Cập nhật trạng thái thành công!');
+
+            // Reload data
+            await loadDefectDetail();
+        } catch (error) {
+            console.error('Update failed:', error);
+            showMessage('error', 'Không thể cập nhật trạng thái. Vui lòng thử lại.');
+        } finally {
+            updateBtn.disabled = false;
+            updateBtn.textContent = 'Cập nhập';
+        }
+    }
+
+    // ==================== MAIN FUNCTION ====================
+    async function loadDefectDetail() {
+        const defectId = getDefectIdFromUrl();
+
+        if (!defectId) {
+            renderError('Không tìm thấy mã lỗi trong URL');
+            return;
+        }
+
+        try {
+            renderLoading();
+            const defect = await fetchDefectDetail(defectId);
+            renderDefectDetail(defect);
+        } catch (error) {
+            console.error('Error loading defect detail:', error);
+            renderError('Không thể tải dữ liệu. Vui lòng kiểm tra kết nối API.');
+        }
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Render current date
+        const today = new Date();
+        document.getElementById('currentDate').textContent = today.toLocaleDateString('vi-VN');
+
+        // Load defect detail
+        loadDefectDetail();
+    });
+</script>
+</body>
+</html>
