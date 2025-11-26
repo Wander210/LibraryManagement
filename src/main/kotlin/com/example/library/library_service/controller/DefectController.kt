@@ -13,30 +13,30 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/defect")
 @CrossOrigin(origins = ["*"])
 class DefectController(private val defectService: DefectService) {
-    @GetMapping("/defect")
+    @GetMapping()
     fun listDefectsApi(): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsForView())
     }
 
-    @GetMapping("/defect/book/{bookId}")
+    @GetMapping("/book/{bookId}")
     fun listDefectsByBookIdApi(@PathVariable bookId: String): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsByBookId(bookId))
     }
 
-    @GetMapping("/defect/borrowRecord/{borrowRecordId}")
+    @GetMapping("/borrowRecord/{borrowRecordId}")
     fun listDefectsByBorrowRecordIdApi(@PathVariable borrowRecordId: String): ResponseEntity<List<DefectDetailDto>> {
         return ResponseEntity.ok(defectService.findAllDefectsByBorrowRecordId(borrowRecordId))
     }
 
-    @GetMapping("/defect/id/{id}")
+    @GetMapping("/id/{id}")
     fun listDefectsByIdApi(@PathVariable id: String): ResponseEntity<DefectDetailDto> {
         return ResponseEntity.ok(defectService.findDefectDetailById(id))
     }
 
-    @PutMapping("/defect/{id}/status")
+    @PutMapping("/{id}/status")
     fun updateDefectStatus(
         @PathVariable id: String,
         @RequestBody request: UpdateDefectStatusRequest

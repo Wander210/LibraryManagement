@@ -728,7 +728,7 @@
         }
 
         async fetchStats(startDate, endDate) {
-            const url = new URL(`${CONFIG.API_BASE_URL}/api/book-stats/list`);
+            const url = new URL(`${CONFIG.API_BASE_URL}/api/book-stats`);
             url.searchParams.append('startDate', startDate);
             url.searchParams.append('endDate', endDate);
 

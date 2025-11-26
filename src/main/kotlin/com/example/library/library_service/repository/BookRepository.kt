@@ -28,4 +28,6 @@ interface BookRepository : JpaRepository<Book, String> {
         @Param("startDate") startDate: LocalDateTime,
         @Param("endDate") endDate: LocalDateTime
     ): List<BookStatsDto>
+
+
 }
