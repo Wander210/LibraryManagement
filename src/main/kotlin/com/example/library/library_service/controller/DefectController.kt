@@ -1,5 +1,6 @@
 package com.example.library.library_service.controller
 
+import com.example.library.library_service.dto.DefectDetailDto
 import com.example.library.library_service.dto.DefectViewDto
 import com.example.library.library_service.dto.UpdateDefectStatusRequest
 import com.example.library.library_service.service.DefectService
@@ -32,8 +33,8 @@ class DefectController(private val defectService: DefectService) {
     }
 
     @GetMapping("/defect/id/{id}")
-    fun listDefectsByIdApi(@PathVariable id: String): ResponseEntity<DefectViewDto> {
-        return ResponseEntity.ok(defectService.findAllDefectsById(id))
+    fun listDefectsByIdApi(@PathVariable id: String): ResponseEntity<DefectDetailDto> {
+        return ResponseEntity.ok(defectService.findDefectDetailById(id))
     }
 
     @PutMapping("/defect/{id}/status")
