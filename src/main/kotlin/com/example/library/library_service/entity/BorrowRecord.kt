@@ -22,6 +22,7 @@ class BorrowRecord(
     var id: String = "",
     var quantity: Int = 0,
     @Column(name = "borrow_time")
+    @CreationTimestamp
     var borrowTime: LocalDateTime = LocalDateTime.now(),
     @Column(name = "due_time")
     var dueTime: LocalDateTime = LocalDateTime.now() + java.time.Duration.ofDays(1),
@@ -32,10 +33,7 @@ class BorrowRecord(
     @Column(name = "grand_total")
     var grandTotal: BigDecimal = BigDecimal.ZERO,
     @Column(name = "is_paid")
-    var isPaid: Boolean = false,
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    var isPaid: Boolean = false
 ) {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reader_id")
@@ -46,7 +44,6 @@ class BorrowRecord(
     @JoinColumn(name = "librarian_id")
     @JsonIgnore
     var librarian: User? = null
-
 
     @OneToMany(mappedBy = "borrowRecord", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

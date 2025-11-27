@@ -2,7 +2,7 @@ package com.example.library.library_service.dto
 
 import java.time.LocalDateTime
 
-data class BookDto (
+data class BookDto @JvmOverloads constructor(
     val id: String,
     val title: String,
     val category: String,

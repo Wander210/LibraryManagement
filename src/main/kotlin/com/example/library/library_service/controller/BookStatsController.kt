@@ -1,6 +1,5 @@
 package com.example.library.library_service.controller
 
-import com.example.library.library_service.dto.BookDto
 import com.example.library.library_service.dto.BookStatsDto
 import com.example.library.library_service.service.BookStatsService
 import org.springframework.http.ResponseEntity
@@ -16,10 +15,5 @@ class BookStatsController(private val bookStatsService: BookStatsService) {
         @RequestParam("endDate", required = true) endDate: String
     ): ResponseEntity<List<BookStatsDto>> {
         return ResponseEntity.ok(bookStatsService.getBookStatistics(startDate, endDate))
-    }
-
-    @GetMapping("/id/{id}")
-    fun listBookStatsByIdApi(@PathVariable id: String): ResponseEntity<BookDto> {
-        return ResponseEntity.ok(bookStatsService.findBookById(id))
     }
 }

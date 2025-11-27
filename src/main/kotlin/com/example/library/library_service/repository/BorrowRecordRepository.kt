@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface BorrowRecordRepository : JpaRepository<BorrowRecord, String> {
+
     fun findByReaderId(readerId: String): List<BorrowRecord>
 }

@@ -82,5 +82,5 @@ interface DefectRepository : JpaRepository<Defect, String> {
       ORDER BY d.createdAt DESC
       """
     )
-    fun findAllDefectsById(id: String): DefectDetailDto
+    fun findDefectDetailById(id: String): DefectDetailDto
 }

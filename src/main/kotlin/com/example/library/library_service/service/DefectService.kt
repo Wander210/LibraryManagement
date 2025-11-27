@@ -22,11 +22,8 @@ class DefectService (
     fun findAllDefectsByBorrowRecordId(borrowRecordId: String): List<DefectDetailDto> =
         defectRepository.findAllDefectsByBorrowRecordId(borrowRecordId)
 
-    fun findAllDefectsById(id: String): DefectDetailDto =
-        defectRepository.findAllDefectsById(id)
-
     fun findDefectDetailById(id: String): DefectDetailDto {
-        val dto = defectRepository.findAllDefectsById(id)
+        val dto = defectRepository.findDefectDetailById(id)
         val photos = photoUrlRepository.findByDefectId(id).map { it.url }
         return dto.copy(photoUrls = photos)
     }
@@ -40,6 +37,6 @@ class DefectService (
         defect.resolvedDate = if (newStatus == DefectStatus.REPAIRED) LocalDate.now() else defect.resolvedDate
 
         defectRepository.save(defect)
-        return defectRepository.findAllDefectsById(defectId)
+        return defectRepository.findDefectDetailById(defectId)
     }
 }

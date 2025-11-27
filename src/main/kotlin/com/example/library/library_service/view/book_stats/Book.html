@@ -523,7 +523,7 @@
         }
 
         async fetchBookDetail(bookId) {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/api/book-stats/id/${encodeURIComponent(bookId)}`);
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/books/${encodeURIComponent(bookId)}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch book detail');
             }

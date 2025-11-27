@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #4A90E2;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            padding: 12px 30px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: none;
+            font-size: 14px;
+            border-right: 1px solid #ddd;
+        }
+
+        .tab.active {
+            background-color: #4A90E2;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* thay thế / cập nhật phần .image-box trong <style> */
+        .image-box {
+            width: 360px;        /* tăng rộng */
+            height: 270px;       /* tăng cao */
+            border: 2px solid #333;
+            background-color: white;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start;
+            font-size: 16px;
+            overflow: auto;      /* cuộn nếu nhiều ảnh */
+            gap: 8px;
+        }
+
+        /* container cho thumbnail */
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        /* thumbnail */
+        .image-gallery img {
+            width: 100px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* nút/placeholder */
+        .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        /* modal phóng to */
+        .image-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        }
+
+        /* nút đóng */
+        .image-modal .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            background: #fff;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .book-details {
+            background-color: white;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .detail-row {
+            display: grid;
+            grid-template-columns: 150px 1fr 150px 100px;
+            gap: 20px;
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+
+        .detail-label {
+            font-weight: bold;
+        }
+
+        .section-title {
+            background-color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #4A90E2;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #e8f4f8;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .error {
+            background-color: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>Hệ Thống Quản Lý Thư Viện</h1>
+    <div class="user-info">
+        <div>Nguyễn Văn A</div>
+        <div>Nhân viên</div>
+        <div id="currentDate"></div>
+    </div>
+</div>
+
+<div class="tabs">
+    <button class="tab">Nhập sách lại</button>
+    <button class="tab">Quản lí thì hàng</button>
+    <button class="tab active">Thống kê sách</button>
+</div>
+
+<div class="container">
+    <div class="info-section">
+        <div class="image-box" id="imageBox">
+            <div class="image-gallery" id="imageGallery">
+                <!-- thumbnails sẽ được render vào đây -->
+            </div>
+            <div id="imageInfo" class="image-placeholder" style="display:none;"></div>
+        </div>
+
+        <!-- Modal phóng to -->
+        <div class="image-modal" id="imageModal" role="dialog" aria-hidden="true">
+            <div class="close-btn" id="modalClose">×</div>
+            <img id="modalImage" src="" alt="Ảnh lớn">
+        </div>
+        <div class="book-details">
+            <div class="detail-row">
+                <span class="detail-label">Tên sách</span>
+                <span id="bookName"></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Mã sách</span>
+                <span id="bookId"></span>
+                <span></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Số bản copy</span>
+                <span id="totalCopies">0</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Số bản còn lại</span>
+                <span id="availableCopies">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">
+        Danh sách phiếu mượn
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Mã Thẻ TV</th>
+                <th>Họ tên thủ thư</th>
+                <th>Tên thủ thư lí</th>
+                <th>Ngày mượn</th>
+                <th>Hạn trả</th>
+                <th>Ngày trả</th>
+                <th>Số ngày muộn</th>
+            </tr>
+            </thead>
+            <tbody id="borrowTable">
+            <tr>
+                <td colspan="7" class="loading">Đang tải dữ liệu...</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Get bookId from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookId = urlParams.get('bookId');
+
+    // Display current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN');
+
+    // Load borrow book data
+    async function loadBorrowBooks() {
+        if (!bookId) {
+            document.getElementById('borrowTable').innerHTML =
+                '<tr><td colspan="7" class="error">Không tìm thấy mã sách trong URL</td></tr>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/borrow-book/book/${bookId}`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', response.status, errorText);
+                throw new Error(`Lỗi ${response.status}: ${errorText || 'Không thể tải dữ liệu'}`);
+            }
+
+            const records = await response.json();
+            console.log('Loaded records:', records);
+
+            // Update book info (using first record if available)
+            if (records.length > 0) {
+                const firstRecord = records[0];
+                document.getElementById('bookId').textContent = firstRecord.bookId || 'N/A';
+                document.getElementById('bookName').textContent = firstRecord.bookTitle || 'N/A';
+
+                // Display copies info from DTO
+                document.getElementById('totalCopies').textContent = firstRecord.totalOfCopies || 0;
+                document.getElementById('availableCopies').textContent = firstRecord.availableCopies || 0;
+                renderImages(records[0].photoUrls);
+            }
+
+            displayRecords(records);
+
+        } catch (error) {
+            console.error('Error loading borrow books:', error);
+            const errorMessage = error.message || 'Không thể tải dữ liệu';
+            document.getElementById('borrowTable').innerHTML =
+                `<tr><td colspan="7" class="error">Lỗi: ${errorMessage}</td></tr>`;
+        }
+    }
+
+    // render danh sách ảnh (photoUrls: Array)
+    function renderImages(photoUrls) {
+        const gallery = document.getElementById('imageGallery');
+        const info = document.getElementById('imageInfo');
+        gallery.innerHTML = '';
+        info.style.display = 'none';
+
+        if (!photoUrls || !Array.isArray(photoUrls) || photoUrls.length === 0) {
+            info.textContent = 'Không có ảnh';
+            info.style.display = 'flex';
+            return;
+        }
+
+        photoUrls.forEach((url, idx) => {
+            // Nếu url rỗng thì skip
+            if (!url) return;
+            const img = document.createElement('img');
+            // nếu url là relative, bạn có thể cần sửa base path ở đây
+            img.src = url;
+            img.alt = `Ảnh ${idx + 1}`;
+            img.loading = 'lazy';
+
+            // khi click: mở modal phóng to
+            img.addEventListener('click', () => {
+                openImageModal(url);
+            });
+
+            // optional: handle image load error để hiển thị placeholder
+            img.addEventListener('error', () => {
+                img.style.opacity = '0.3';
+                img.title = 'Không tải được ảnh (kiểm tra URL/CORS)';
+            });
+
+            gallery.appendChild(img);
+        });
+    }
+
+    // modal control
+    function openImageModal(url) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = url;
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        // optional: clear src to release memory
+        modalImage.src = '';
+    }
+
+    document.getElementById('modalClose').addEventListener('click', closeImageModal);
+    document.getElementById('imageModal').addEventListener('click', (e) => {
+        // click ra ngoài ảnh sẽ đóng modal
+        if (e.target.id === 'imageModal') closeImageModal();
+    });
+
+    // Display records in table
+    function displayRecords(records) {
+        const tbody = document.getElementById('borrowTable');
+
+        if (records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty">Không có dữ liệu</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = records.map(record => {
+            const borrowDate = formatDate(record.borrowTime);
+            const dueDate = formatDate(record.dueTime);
+            const returnDate = record.returnTime ? formatDate(record.returnTime) : '';
+            const daysOverdue = record.daysOverdue;
+
+            return `
+                <tr>
+                    <td>${record.id}</td>
+                    <td>${record.readerName}</td>
+                    <td>${record.librarianName}</td>
+                    <td>${borrowDate}</td>
+                    <td>${dueDate}</td>
+                    <td>${returnDate}</td>
+                    <td>${daysOverdue}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Utility functions
+    function formatDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN');
+    }
+
+    // Load data on page load
+    loadBorrowBooks();
+</script>
+</body>
+</html>
