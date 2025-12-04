@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .user-section {
+            margin-bottom: 20px;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+            border: 1px solid #dee2e6;
+        }
+
+        .user-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .user-table td {
+            background: white;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .left-panel,
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .section-box {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .section-header {
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            background: white;
+        }
+
+        .search-section {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .search-btn {
+            padding: 8px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .search-btn:hover {
+            background: #0056b3;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .filter-tab:hover {
+            background: #f8f9fa;
+        }
+
+        .filter-tab.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        td {
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .return-table th,
+        .return-table td {
+            text-align: left;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0 2px;
+        }
+
+        .btn-return {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-return:hover {
+            background: #0056b3;
+        }
+
+        .btn-defect {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-defect:hover {
+            background: #c82333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+            font-size: 13px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Nguyễn Văn A</div>
+            <div>Thủ thư</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active">Nhập sách trả</button>
+        <button class="tab">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="content">
+        <!-- User Info Section -->
+        <div class="user-section">
+            <table class="user-table">
+                <thead>
+                <tr>
+                    <th>Mã độc giả</th>
+                    <th>Họ và tên</th>
+                    <th>Số điện thoại</th>
+                    <th>email</th>
+                    <th>Địa chỉ</th>
+                </tr>
+                </thead>
+                <tbody id="userInfo">
+                <tr>
+                    <td colspan="5" class="loading">Đang tải thông tin người dùng...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <div class="section-box">
+                    <div class="section-header">Đã chọn</div>
+                    <div class="section-content">
+                        <div id="selectedBooksContainer">
+                            <div class="no-data">Chưa chọn sách nào</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-bar">
+                        <input type="text" id="filterBookName" placeholder="Nhập tên sách...">
+                        <button class="search-btn" id="searchBtn">Tìm kiếm</button>
+                        <button class="search-btn" id="reloadBtn" style="background: #28a745;">Tải lại</button>
+                    </div>
+                </div>
+
+                <!-- Borrowed Books Section -->
+                <div class="section-box">
+                    <div class="section-content">
+                        <div id="borrowedBooksContainer">
+                            <div class="loading">Đang tải danh sách sách đang mượn...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080'
+    };
+
+    // ==================== MODEL ====================
+    class ReturnBookModel {
+        constructor() {
+            this.userId = null;
+            this.userInfo = null;
+            this.borrowedBooks = [];
+            this.selectedBooks = [];
+            this.filterText = '';
+            this.filterType = 'all';
+        }
+
+        setUserId(userId) {
+            this.userId = userId;
+        }
+
+        setUserInfo(userInfo) {
+            this.userInfo = userInfo;
+        }
+
+        setBorrowedBooks(books) {
+            this.borrowedBooks = books;
+        }
+
+        addSelectedBook(book) {
+            if (!this.selectedBooks.find(b => b.id === book.id)) {
+                this.selectedBooks.push(book);
+            }
+        }
+
+        removeSelectedBook(bookId) {
+            this.selectedBooks = this.selectedBooks.filter(b => b.id !== bookId);
+        }
+
+        isBookSelected(bookId) {
+            return this.selectedBooks.some(b => b.id === bookId);
+        }
+
+        setFilterText(text) {
+            this.filterText = text.toLowerCase();
+        }
+
+        setFilterType(type) {
+            this.filterType = type;
+        }
+
+        isOverdue(dueDate) {
+            return new Date(dueDate) < new Date();
+        }
+
+        getFilteredBorrowedBooks() {
+            let books = this.borrowedBooks;
+
+            if (this.filterType === 'overdue') {
+                books = books.filter(book => this.isOverdue(book.dueTime));
+            }
+
+            if (this.filterText) {
+                books = books.filter(book =>
+                    book.bookTitle?.toLowerCase().includes(this.filterText)
+                );
+            }
+
+            return books;
+        }
+
+        clearSelections() {
+            this.selectedBooks = [];
+        }
+    }
+
+    // ==================== VIEW ====================
+    class ReturnBookView {
+        constructor() {
+            this.elements = {
+                currentDate: document.getElementById('currentDate'),
+                userInfo: document.getElementById('userInfo'),
+                borrowedBooksContainer: document.getElementById('borrowedBooksContainer'),
+                selectedBooksContainer: document.getElementById('selectedBooksContainer'),
+                filterBookName: document.getElementById('filterBookName'),
+                searchBtn: document.getElementById('searchBtn'),
+                reloadBtn: document.getElementById('reloadBtn')
+            };
+            
+            // Store reference to confirm button (will be set when rendering selected books)
+            this.confirmBtn = null;
+        }
+
+        renderDate() {
+            const today = new Date();
+            this.elements.currentDate.textContent = today.toLocaleDateString('vi-VN');
+        }
+
+        renderUserInfo(user) {
+            if (!user) {
+                this.elements.userInfo.innerHTML = '<tr><td colspan="5" class="error">Không tìm thấy thông tin người dùng</td></tr>';
+                return;
+            }
+
+            this.elements.userInfo.innerHTML = `
+                <tr>
+                    <td>${this.escapeHtml(user.id || '')}</td>
+                    <td>${this.escapeHtml(user.fullName || '')}</td>
+                    <td>${this.escapeHtml(user.phone || '')}</td>
+                    <td>${this.escapeHtml(user.email || '')}</td>
+                    <td>${this.escapeHtml(user.address || '')}</td>
+                </tr>
+            `;
+        }
+
+        renderBorrowedBooks(books) {
+            if (!books || books.length === 0) {
+                this.elements.borrowedBooksContainer.innerHTML = '<div class="no-data">Không có sách</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tên sách</th>
+                            <th>Mã mượn</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Số ngày trễ</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${books.map(book => this.renderBorrowedBookRow(book)).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            this.elements.borrowedBooksContainer.innerHTML = tableHTML;
+        }
+
+        renderBorrowedBookRow(book) {
+            const daysLate = this.calculateDaysLate(book.dueTime);
+
+            return `
+                <tr>
+                    <td>${this.escapeHtml(book.bookTitle || '')}</td>
+                    <td>${this.escapeHtml(book.borrowRecordId || '')}</td>
+                    <td>${this.formatDate(book.borrowTime)}</td>
+                    <td>${this.formatDate(book.dueTime)}</td>
+                    <td>${daysLate > 0 ? daysLate : 0}</td>
+                    <td>
+                        <button class="action-btn btn-return"
+                                data-book-id="${this.escapeHtml(book.id || '')}"
+                                data-action="select">
+                            Chọn sách
+                        </button>
+                        <button class="action-btn btn-defect"
+                                data-book-id="${this.escapeHtml(book.bookId || '')}"
+                                data-record-id="${this.escapeHtml(book.borrowRecordId || '')}"
+                                data-action="defect">
+                            Báo cáo hỏng
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        renderSelectedBooks(books) {
+            if (!books || books.length === 0) {
+                this.elements.selectedBooksContainer.innerHTML = '<div class="no-data">Chưa chọn sách nào</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table class="return-table">
+                    <thead>
+                        <tr>
+                            <th>Tên sách</th>
+                            <th>Mã mượn</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Ngày trả</th>
+                            <th>Số ngày trễ</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${books.map(book => this.renderSelectedBookRow(book)).join('')}
+                    </tbody>
+                </table>
+                <div style="padding: 15px; text-align: center;">
+                    <button class="search-btn" id="confirmBtn" style="background: #28a745; min-width: 120px;">
+                        Xác nhận
+                    </button>
+                </div>
+            `;
+
+            this.elements.selectedBooksContainer.innerHTML = tableHTML;
+        }
+
+        renderSelectedBookRow(book) {
+            const returnTime = book.returnTime ? new Date(book.returnTime) : new Date();
+            const daysLate = this.calculateDaysLateWithReturnTime(book.dueTime, returnTime);
+
+            return `
+                <tr>
+                    <td>${this.escapeHtml(book.bookTitle || '')}</td>
+                    <td>${this.escapeHtml(book.borrowRecordId || '')}</td>
+                    <td>${this.formatDate(book.borrowTime)}</td>
+                    <td>${this.formatDate(book.dueTime)}</td>
+                    <td>
+                        <input type="datetime-local" 
+                               class="return-time-input" 
+                               data-book-id="${this.escapeHtml(book.id || '')}"
+                               value="${this.formatDateTimeLocal(returnTime)}"
+                               style="padding: 4px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; width: 100%;">
+                    </td>
+                    <td>${daysLate > 0 ? daysLate : 0}</td>
+                    <td>
+                        <button class="action-btn btn-defect" 
+                                data-book-id="${this.escapeHtml(book.id || '')}"
+                                data-action="remove">
+                            Xóa
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        calculateDaysLateWithReturnTime(dueTime, returnTime) {
+            if (!dueTime || !returnTime) return 0;
+            const due = new Date(dueTime);
+            const returnDate = new Date(returnTime);
+            const diff = Math.floor((returnDate - due) / (1000 * 60 * 60 * 24));
+            return diff > 0 ? diff : 0;
+        }
+
+        formatDateTimeLocal(dateTimeString) {
+            if (!dateTimeString) return '';
+            const date = new Date(dateTimeString);
+            if (isNaN(date.getTime())) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        updateFilterTab(filterType) {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === filterType);
+            });
+        }
+
+        renderLoading(container, message = 'Đang tải...') {
+            container.innerHTML = `<div class="loading">${message}</div>`;
+        }
+
+        renderError(container, message) {
+            container.innerHTML = `<div class="error">${this.escapeHtml(message)}</div>`;
+        }
+
+        calculateDaysLate(dueTime) {
+            if (!dueTime) return 0;
+            const due = new Date(dueTime);
+            const today = new Date();
+            const diff = Math.floor((today - due) / (1000 * 60 * 60 * 24));
+            return diff > 0 ? diff : 0;
+        }
+
+        formatDate(dateTimeString) {
+            if (!dateTimeString) return '';
+            const date = new Date(dateTimeString);
+            if (isNaN(date.getTime())) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        showAlert(message) {
+            alert(message);
+        }
+
+        confirmAction(message) {
+            return confirm(message);
+        }
+    }
+
+    // ==================== CONTROLLER ====================
+    class ReturnBookController {
+        constructor(model, view) {
+            this.model = model;
+            this.view = view;
+            this.init();
+        }
+
+        async init() {
+            this.view.renderDate();
+            this.getUserIdFromURL();
+            this.loadSelectedBooksFromStorage();
+            this.setupEventListeners();
+            await this.loadData();
+        }
+
+        loadSelectedBooksFromStorage() {
+            const storageKey = `returnBooks_${this.model.userId}`;
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+                try {
+                    const books = JSON.parse(stored);
+                    this.model.selectedBooks = books;
+                } catch (e) {
+                    console.error('Error loading from localStorage:', e);
+                }
+            }
+        }
+
+        saveSelectedBooksToStorage() {
+            const storageKey = `returnBooks_${this.model.userId}`;
+            localStorage.setItem(storageKey, JSON.stringify(this.model.selectedBooks));
+        }
+
+        getUserIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userId');
+            if (!userId) {
+                this.view.showAlert('Không tìm thấy mã người dùng');
+                window.history.back();
+                return;
+            }
+            this.model.setUserId(userId);
+        }
+
+        setupEventListeners() {
+            this.view.elements.searchBtn.addEventListener('click', () => {
+                this.handleSearch();
+            });
+
+            this.view.elements.reloadBtn.addEventListener('click', () => {
+                this.handleReload();
+            });
+
+            this.view.elements.filterBookName.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch();
+                }
+            });
+
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const filterType = e.target.dataset.filter;
+                    this.handleFilterChange(filterType);
+                });
+            });
+
+            this.view.elements.borrowedBooksContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const action = button.dataset.action;
+                const bookId = button.dataset.bookId;
+                const recordId = button.dataset.recordId;
+
+                if (action === 'select') {
+                    this.handleSelectBook(bookId);
+                } else if (action === 'defect') {
+                    this.handleReportDefect(bookId, recordId);
+                }
+            });
+
+            // Event delegation for selected books container
+            this.view.elements.selectedBooksContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button && button.dataset.action === 'remove') {
+                    const bookId = button.dataset.bookId;
+                    this.handleRemoveBook(bookId);
+                }
+            });
+
+            // Event delegation for returnTime input changes
+            this.view.elements.selectedBooksContainer.addEventListener('change', (e) => {
+                if (e.target.classList.contains('return-time-input')) {
+                    const bookId = e.target.dataset.bookId;
+                    const returnTime = e.target.value;
+                    this.handleUpdateReturnTime(bookId, returnTime);
+                }
+            });
+        }
+
+        async loadData() {
+            try {
+                await this.loadUserInfo();
+                await this.loadBorrowedBooks();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        async loadUserInfo() {
+            try {
+                const userInfo = await this.fetchUserInfo(this.model.userId);
+                this.model.setUserInfo(userInfo);
+                this.view.renderUserInfo(userInfo);
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                this.view.renderError(this.view.elements.userInfo, 'Không thể tải thông tin người dùng');
+            }
+        }
+
+        async loadBorrowedBooks() {
+            try {
+                this.view.renderLoading(this.view.elements.borrowedBooksContainer, 'Đang tải danh sách sách...');
+                const books = await this.fetchBorrowedBooks(this.model.userId);
+                this.model.setBorrowedBooks(books);
+                
+                // Remove selected books that are no longer in borrowed books list
+                const borrowedBookIds = new Set(books.map(b => b.id));
+                this.model.selectedBooks = this.model.selectedBooks.filter(b => borrowedBookIds.has(b.id));
+                this.saveSelectedBooksToStorage();
+                
+                this.render();
+            } catch (error) {
+                console.error('Error loading borrowed books:', error);
+                this.view.renderError(this.view.elements.borrowedBooksContainer, 'Không thể tải danh sách sách đang mượn');
+            }
+        }
+
+        async fetchUserInfo(userId) {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/user/id/${encodeURIComponent(userId)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        async fetchBorrowedBooks(userId) {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/borrow-book/reader/${encodeURIComponent(userId)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    return [];
+                }
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        handleSearch() {
+            const text = this.view.elements.filterBookName.value;
+            this.model.setFilterText(text);
+            this.render();
+        }
+
+        async handleReload() {
+            // Reset filter
+            this.view.elements.filterBookName.value = '';
+            this.model.setFilterText('');
+            this.model.setFilterType('all');
+            
+            // Reload data from API
+            await this.loadBorrowedBooks();
+        }
+
+        handleFilterChange(filterType) {
+            this.model.setFilterType(filterType);
+            this.view.updateFilterTab(filterType);
+            this.render();
+        }
+
+        handleSelectBook(bookId) {
+            const book = this.model.borrowedBooks.find(b => b.id === bookId);
+            if (!book) return;
+
+            if (this.model.isBookSelected(bookId)) {
+                this.view.showAlert('Sách này đã được chọn');
+                return;
+            }
+
+            // Add returnTime to book object
+            const bookWithReturnTime = {
+                ...book,
+                returnTime: new Date().toISOString()
+            };
+
+            this.model.addSelectedBook(bookWithReturnTime);
+            this.saveSelectedBooksToStorage();
+            this.render();
+        }
+
+        handleRemoveBook(bookId) {
+            this.model.removeSelectedBook(bookId);
+            this.saveSelectedBooksToStorage();
+            this.render();
+        }
+
+        handleUpdateReturnTime(bookId, returnTime) {
+            const book = this.model.selectedBooks.find(b => b.id === bookId);
+            if (book) {
+                // Convert datetime-local to ISO string
+                const date = new Date(returnTime);
+                book.returnTime = date.toISOString();
+                this.saveSelectedBooksToStorage();
+                this.render();
+            }
+        }
+
+        async handleConfirm() {
+            if (this.model.selectedBooks.length === 0) {
+                this.view.showAlert('Vui lòng chọn ít nhất một cuốn sách');
+                return;
+            }
+
+            if (!this.view.confirmAction('Xác nhận trả sách đã chọn?')) {
+                return;
+            }
+
+            try {
+                // Get librarian ID (hardcoded for now, should be from session)
+                const librarianId = 'LIB001'; // TODO: Get from session
+
+                const request = {
+                    readerId: this.model.userId,
+                    librarianId: librarianId,
+                    books: this.model.selectedBooks.map(book => ({
+                        borrowBookId: book.id,
+                        returnTime: book.returnTime || new Date().toISOString()
+                    }))
+                };
+
+                const returnRecord = await this.commitReturnBooks(request);
+                
+                // Clear localStorage
+                const storageKey = `returnBooks_${this.model.userId}`;
+                localStorage.removeItem(storageKey);
+                
+                // Navigate to ReturnRecord page
+                window.location.href = `ReturnRecord.html?returnRecordId=${encodeURIComponent(returnRecord.id)}`;
+            } catch (error) {
+                console.error('Error committing return books:', error);
+                this.view.showAlert('Có lỗi xảy ra khi xác nhận trả sách. Vui lòng thử lại.');
+            }
+        }
+
+        async commitReturnBooks(request) {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/return-record`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(request)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
+            }
+
+            return await response.json();
+        }
+
+        handleReportDefect(bookId, recordId) {
+            window.location.href = `ReportDefect.html?bookId=${encodeURIComponent(bookId)}&borrowRecordId=${encodeURIComponent(recordId)}`;
+        }
+
+        render() {
+            const filteredBooks = this.model.getFilteredBorrowedBooks();
+
+            this.view.renderBorrowedBooks(filteredBooks);
+            this.view.renderSelectedBooks(this.model.selectedBooks);
+            
+            // Setup confirm button listener after rendering
+            const confirmBtn = document.getElementById('confirmBtn');
+            if (confirmBtn && !confirmBtn.hasAttribute('data-listener-attached')) {
+                confirmBtn.setAttribute('data-listener-attached', 'true');
+                confirmBtn.addEventListener('click', () => {
+                    this.handleConfirm();
+                });
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const model = new ReturnBookModel();
+        const view = new ReturnBookView();
+        const controller = new ReturnBookController(model, view);
+    });
+</script>
+</body>
+</html>

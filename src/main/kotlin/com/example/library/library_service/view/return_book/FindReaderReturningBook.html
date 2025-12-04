@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .search-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 100px;
+        }
+
+        .search-btn:hover {
+            background: #0056b3;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .action-btn {
+            padding: 6px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .action-btn:hover {
+            background: #0056b3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Nguyễn Văn A</div>
+            <div>Thủ thư</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active">Nhập sách trả</button>
+        <button class="tab">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="search-section">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm theo...">
+            <button id="searchBtn" class="search-btn" type="button">Số điện thoại</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="tableContainer">
+            <div class="loading">Nhập thông tin để tìm kiếm</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080'
+    };
+
+    // ==================== MODEL ====================
+    class UserModel {
+        constructor() {
+            this.users = [];
+        }
+
+        setUsers(users) {
+            this.users = Array.isArray(users) ? users : [users];
+        }
+
+        getUsers() {
+            return this.users;
+        }
+
+        clear() {
+            this.users = [];
+        }
+    }
+
+    // ==================== VIEW ====================
+    class UserView {
+        constructor() {
+            this.elements = {
+                currentDate: document.getElementById('currentDate'),
+                searchInput: document.getElementById('searchInput'),
+                searchBtn: document.getElementById('searchBtn'),
+                tableContainer: document.getElementById('tableContainer')
+            };
+        }
+
+        renderDate() {
+            const today = new Date();
+            this.elements.currentDate.textContent = today.toLocaleDateString('vi-VN');
+        }
+
+        renderTable(users) {
+            if (!users || users.length === 0) {
+                this.elements.tableContainer.innerHTML = '<div class="no-data">Không tìm thấy người dùng</div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã độc giả</th>
+                            <th>Họ và tên</th>
+                            <th>Số điện thoại</th>
+                            <th>email</th>
+                            <th>Địa chỉ</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => this.renderTableRow(user)).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            this.elements.tableContainer.innerHTML = tableHTML;
+        }
+
+        renderTableRow(user) {
+            return `
+                <tr class="clickable-row">
+                    <td>${this.escapeHtml(user.id || '')}</td>
+                    <td>${this.escapeHtml(user.fullName || '')}</td>
+                    <td>${this.escapeHtml(user.phone || '')}</td>
+                    <td>${this.escapeHtml(user.email || '')}</td>
+                    <td>${this.escapeHtml(user.address || '')}</td>
+                    <td>
+                        <button class="action-btn" data-user-id="${this.escapeHtml(user.id || '')}">
+                            Tạo phiếu trả
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        renderLoading() {
+            this.elements.tableContainer.innerHTML = '<div class="loading">Đang tải dữ liệu...</div>';
+        }
+
+        renderError(message) {
+            this.elements.tableContainer.innerHTML = `<div class="error">${this.escapeHtml(message)}</div>`;
+        }
+
+        renderInitial() {
+            this.elements.tableContainer.innerHTML = '<div class="loading">Nhập thông tin để tìm kiếm</div>';
+        }
+
+        getSearchValue() {
+            return this.elements.searchInput.value.trim();
+        }
+
+        clearSearch() {
+            this.elements.searchInput.value = '';
+        }
+
+        // Helper methods
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
+
+    // ==================== CONTROLLER ====================
+    class UserController {
+        constructor(model, view) {
+            this.model = model;
+            this.view = view;
+            this.init();
+        }
+
+        init() {
+            this.view.renderDate();
+            this.setupEventListeners();
+        }
+
+        setupEventListeners() {
+            // Search button
+            this.view.elements.searchBtn.addEventListener('click', () => {
+                this.handleSearch();
+            });
+
+            // Search on Enter
+            this.view.elements.searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch();
+                }
+            });
+
+            // Action buttons
+            this.view.elements.tableContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.action-btn');
+                const userId = btn?.dataset?.userId;
+                if (userId) window.location.href = `ReturnBook.html?userId=${encodeURIComponent(userId)}`;
+            });
+        }
+
+        async handleSearch() {
+            const searchValue = this.view.getSearchValue();
+
+            if (!searchValue) {
+                this.view.renderError('Vui lòng nhập số điện thoại');
+                return;
+            }
+
+            try {
+                this.view.renderLoading();
+                const users = await this.searchUsers(searchValue);
+                this.model.setUsers(users);
+                this.view.renderTable(this.model.getUsers());
+            } catch (error) {
+                console.error('Error searching users:', error);
+                this.view.renderError('Không thể tìm kiếm người dùng. Vui lòng thử lại.');
+            }
+        }
+
+        async searchUsers(phone) {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/api/user/phone/${encodeURIComponent(phone)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        return [];
+                    }
+                    const errorText = await response.text();
+                    console.error('API Error:', response.status, errorText);
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                if (error instanceof TypeError && error.message.includes('fetch')) {
+                    throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra API đang chạy.');
+                }
+                throw error;
+            }
+        }
+
+        handleCreateReturn(userId) {
+            if (!userId) {
+                return;
+            }
+            // Navigate to return book page with user ID
+            window.location.href = `ReturnBook.html?userId=${encodeURIComponent(userId)}`;
+        }
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        const model = new UserModel();
+        const view = new UserView();
+        const controller = new UserController(model, view);
+    });
+</script>
+</body>
+</html>
