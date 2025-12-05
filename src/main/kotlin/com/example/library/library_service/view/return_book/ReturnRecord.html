@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện - Phiếu Trả Sách</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .info-box.reader-info {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .section-box {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .section-content {
+            padding: 15px;
+            background: white;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .return-header {
+            background: #dc3545;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .return-header h2 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .return-header .date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .table-title {
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table-title.borrowed {
+            background: #17a2b8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            color: #495057;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-late {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .action-link {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .action-link:hover {
+            color: #0056b3;
+        }
+
+        .fee-summary {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .fee-row.total {
+            border-top: 2px solid #dee2e6;
+            margin-top: 10px;
+            padding-top: 15px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .fee-label {
+            color: #495057;
+        }
+
+        .fee-value {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .fee-value.red {
+            color: #dc3545;
+        }
+
+        .fee-value.highlight {
+            color: #dc3545;
+            font-size: 18px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+
+        .btn-confirm {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #218838;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .note {
+            font-size: 12px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Nguyễn Văn A</div>
+            <div>Thủ thư</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active">Nhập sách trả</button>
+        <button class="tab">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="content">
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Reader Info -->
+                <div class="info-box reader-info">
+                    <div class="section-header" style="background: transparent; border: none; padding: 0 0 10px 0;">
+                        Thông tin bạn đọc
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mã bạn đọc</span>
+                        <span class="info-value" id="readerId">DG001</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Họ và tên</span>
+                        <span class="info-value" id="readerName">Trần Thị B</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value" id="readerEmail">tran.b@gmail.com</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Địa chỉ</span>
+                        <span class="info-value" id="readerAddress">Ba sao, Hạ Long, Hải Dương</span>
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="info-box">
+                    <div class="section-header" style="background: transparent; border: none; padding: 0 0 10px 0;">
+                        Chi phí thanh toán
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phí trả muộn</span>
+                        <span class="info-value" id="rentalFee">0 VNĐ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phí trả hư hỏng</span>
+                        <span class="info-value status-late" id="damageFee">0 VNĐ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Thuế</span>
+                        <span class="info-value" id="taxFee">0 VNĐ</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tổng cộng</span>
+                        <span class="info-value status-late" id="totalFee">0 VNĐ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Return Header -->
+                <div class="return-header">
+                    <h2>Phiếu trả</h2>
+                    <div class="date">Ngày tạo: <span id="headerDate">12/11/2025</span></div>
+                    <div class="date">15:34</div>
+                </div>
+
+                <!-- Borrowed Books Table -->
+                <div class="table-container">
+                    <div class="table-title borrowed">Thông tin sách mượn</div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã sách</th>
+                            <th>Tên sách</th>
+                            <th>Ngày mượn</th>
+                            <th>Hạn trả</th>
+                            <th>Số ngày trễ</th>
+                        </tr>
+                        </thead>
+                        <tbody id="borrowedBooksTable">
+                        <tr>
+                            <td colspan="5" class="loading">Đang tải dữ liệu...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Damaged Books Table -->
+                <div class="table-container">
+                    <div class="table-title">Chi tiết lỗi hỏng</div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Mã sách</th>
+                            <th>Tên sách</th>
+                            <th>Mức độ</th>
+                            <th>Chi tiết lỗi hỏng</th>
+                        </tr>
+                        </thead>
+                        <tbody id="damagedBooksTable">
+                        <tr>
+                            <td colspan="4" class="loading">Đang tải dữ liệu...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Fee Summary -->
+                <div class="fee-summary">
+                    <div class="fee-row">
+                        <span class="fee-label">Tổng cộng</span>
+                        <span class="fee-value" id="summarySubtotal">0 VNĐ</span>
+                    </div>
+                    <div class="fee-row">
+                        <span class="fee-label">Thuế</span>
+                        <span class="fee-value" id="summaryTax">0 VNĐ</span>
+                    </div>
+                    <div class="fee-row">
+                        <span class="fee-label">Giảm giá</span>
+                        <span class="fee-value" id="summaryDiscount">0 VNĐ</span>
+                    </div>
+                    <div class="fee-row total">
+                        <span class="fee-label">Thành tiền</span>
+                        <span class="fee-value highlight" id="summaryTotal">0 VNĐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080',
+        RENTAL_TAX_RATE: 0.10, // 10%
+    };
+
+    // ==================== MODEL ====================
+    class ReturnRecordModel {
+        constructor() {
+            this.userId = null;
+            this.returnRecordId = null;
+            this.readerInfo = null;
+            this.borrowedBooks = [];
+            this.damagedBooks = [];
+            this.fees = {
+                cardFee: 0,
+                rentalFee: 0,
+                damageFee: 0,
+                tax: 0,
+                total: 0,
+                discount: 0
+            };
+        }
+
+        setUserId(userId) {
+            this.userId = userId;
+        }
+
+        setReturnRecordId(returnRecordId) {
+            this.returnRecordId = returnRecordId;
+        }
+
+        setReturnRecordData(data) {
+            if (!data) {
+                console.error('setReturnRecordData: data is null or undefined');
+                return;
+            }
+
+            // Set reader info
+            if (data.reader) {
+                this.readerInfo = {
+                    readerId: data.reader.id || '-',
+                    name: data.reader.fullName || '-',
+                    email: data.reader.email || '-',
+                    address: data.reader.address || '-'
+                };
+            } else {
+                console.error('setReturnRecordData: reader is missing');
+                this.readerInfo = {
+                    readerId: '-',
+                    name: '-',
+                    email: '-',
+                    address: '-'
+                };
+            }
+
+            // Set borrowed books
+            if (data.books && Array.isArray(data.books)) {
+                this.borrowedBooks = data.books.map(book => ({
+                    bookId: book.bookId || '-',
+                    bookTitle: book.bookTitle || '-',
+                    borrowDate: book.borrowDate,
+                    dueDate: book.dueDate,
+                    daysLate: book.daysLate || 0,
+                    lateFee: book.lateFee || 0
+                }));
+            } else {
+                console.warn('setReturnRecordData: books is missing or not an array');
+                this.borrowedBooks = [];
+            }
+
+            // Set damaged books (defects)
+            if (data.defects && Array.isArray(data.defects)) {
+                this.damagedBooks = data.defects.map(defect => ({
+                    bookId: defect.bookId || '-',
+                    bookTitle: defect.bookTitle || '-',
+                    severity: defect.severity || 'LOW',
+                    description: defect.description || '-',
+                    defectId: defect.defectId || '-',
+                    defectFee: defect.defectFee || 0
+                }));
+            } else {
+                console.warn('setReturnRecordData: defects is missing or not an array');
+                this.damagedBooks = [];
+            }
+
+            // Set fees from backend (already calculated)
+            // Handle BigDecimal conversion - can be number or string
+            const parseBigDecimal = (value) => {
+                if (value === null || value === undefined) return 0;
+                if (typeof value === 'number') return value;
+                if (typeof value === 'string') return parseFloat(value) || 0;
+                return 0;
+            };
+
+            this.fees = {
+                cardFee: 0, // No card fee in current system
+                rentalFee: parseBigDecimal(data.totalLateFee),
+                damageFee: parseBigDecimal(data.totalDefectFee),
+                tax: parseBigDecimal(data.tax),
+                total: parseBigDecimal(data.grandFee),
+                discount: 0 // No discount in current system
+            };
+            
+            console.log('Fees parsed:', this.fees);
+        }
+
+        getFees() {
+            return this.fees;
+        }
+    }
+
+    // ==================== VIEW ====================
+    class ReturnRecordView {
+        constructor() {
+            this.elements = {
+                currentDate: document.getElementById('currentDate'),
+                headerDate: document.getElementById('headerDate'),
+                readerId: document.getElementById('readerId'),
+                readerName: document.getElementById('readerName'),
+                readerEmail: document.getElementById('readerEmail'),
+                readerAddress: document.getElementById('readerAddress'),
+                rentalFee: document.getElementById('rentalFee'),
+                damageFee: document.getElementById('damageFee'),
+                taxFee: document.getElementById('taxFee'),
+                totalFee: document.getElementById('totalFee'),
+                borrowedBooksTable: document.getElementById('borrowedBooksTable'),
+                damagedBooksTable: document.getElementById('damagedBooksTable'),
+                summarySubtotal: document.getElementById('summarySubtotal'),
+                summaryTax: document.getElementById('summaryTax'),
+                summaryDiscount: document.getElementById('summaryDiscount'),
+                summaryTotal: document.getElementById('summaryTotal'),
+                backBtn: document.getElementById('backBtn'),
+                confirmBtn: document.getElementById('confirmBtn')
+            };
+            
+            // Log missing elements for debugging
+            const missingElements = [];
+            for (const [key, element] of Object.entries(this.elements)) {
+                if (!element && key !== 'backBtn' && key !== 'confirmBtn') {
+                    missingElements.push(key);
+                }
+            }
+            if (missingElements.length > 0) {
+                console.warn('Missing elements:', missingElements);
+            }
+        }
+
+        renderDate() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('vi-VN');
+            this.elements.currentDate.textContent = dateStr;
+        }
+
+        renderReturnDate(createTime) {
+            if (createTime) {
+                const date = new Date(createTime);
+                const dateStr = date.toLocaleDateString('vi-VN');
+                const timeStr = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                this.elements.headerDate.textContent = dateStr;
+                // Update time if there's a time element
+                const timeElement = document.querySelector('.return-header .date:last-child');
+                if (timeElement) {
+                    timeElement.textContent = timeStr;
+                }
+            }
+        }
+
+        renderReaderInfo(info) {
+            console.log('renderReaderInfo called with:', info);
+            if (!info) {
+                console.warn('renderReaderInfo: info is null or undefined');
+                return;
+            }
+
+            if (!this.elements.readerId) {
+                console.error('renderReaderInfo: readerId element not found');
+                return;
+            }
+
+            try {
+                this.elements.readerId.textContent = info.readerId || '-';
+                this.elements.readerName.textContent = info.name || '-';
+                this.elements.readerEmail.textContent = info.email || '-';
+                this.elements.readerAddress.textContent = info.address || '-';
+                console.log('Reader info rendered successfully');
+            } catch (error) {
+                console.error('Error rendering reader info:', error);
+            }
+        }
+
+        renderBorrowedBooks(books) {
+            console.log('renderBorrowedBooks called with:', books);
+            if (!books || books.length === 0) {
+                console.log('No borrowed books to render');
+                this.elements.borrowedBooksTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">Không có sách đang mượn</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            try {
+                this.elements.borrowedBooksTable.innerHTML = books.map(book => `
+                    <tr>
+                        <td>${this.escapeHtml(book.bookId)}</td>
+                        <td>${this.escapeHtml(book.bookTitle)}</td>
+                        <td>${this.formatDateTime(book.borrowDate)}</td>
+                        <td>${this.formatDateTime(book.dueDate)}</td>
+                        <td class="${book.daysLate > 0 ? 'status-late' : ''}">${book.daysLate || 0}</td>
+                    </tr>
+                `).join('');
+                console.log('Borrowed books rendered successfully');
+            } catch (error) {
+                console.error('Error rendering borrowed books:', error);
+            }
+        }
+
+        renderDamagedBooks(books) {
+            if (!books || books.length === 0) {
+                this.elements.damagedBooksTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">Không có sách bị hư hỏng</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const severityMap = {
+                'LOW': 'Nhẹ',
+                'MEDIUM': 'Trung bình',
+                'HIGH': 'Nghiêm trọng'
+            };
+
+            this.elements.damagedBooksTable.innerHTML = books.map(book => `
+                <tr>
+                    <td>${this.escapeHtml(book.bookId)}</td>
+                    <td>${this.escapeHtml(book.bookTitle)}</td>
+                    <td>${severityMap[book.severity] || book.severity}</td>
+                    <td><span class="action-link" onclick="viewDefectDetail('${book.defectId}')">${this.escapeHtml(book.description || '-')}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        renderFees(fees) {
+            console.log('renderFees called with:', fees);
+            try {
+                // Left panel fees
+                this.elements.rentalFee.textContent = this.formatCurrency(fees.rentalFee);
+                this.elements.damageFee.textContent = this.formatCurrency(fees.damageFee);
+                this.elements.taxFee.textContent = this.formatCurrency(fees.tax);
+                this.elements.totalFee.textContent = this.formatCurrency(fees.total);
+
+                // Summary panel
+                const subtotal = fees.rentalFee + fees.damageFee;
+                this.elements.summarySubtotal.textContent = this.formatCurrency(subtotal);
+                this.elements.summaryTax.textContent = this.formatCurrency(fees.tax);
+                this.elements.summaryDiscount.textContent = this.formatCurrency(fees.discount || 0);
+                this.elements.summaryTotal.textContent = this.formatCurrency(fees.total);
+                console.log('Fees rendered successfully');
+            } catch (error) {
+                console.error('Error rendering fees:', error);
+            }
+        }
+
+        formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '-';
+            const date = new Date(dateTimeStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        showAlert(message) {
+            alert(message);
+        }
+
+        confirmAction(message) {
+            return confirm(message);
+        }
+    }
+
+    // ==================== CONTROLLER ====================
+    class ReturnRecordController {
+        constructor(model, view) {
+            this.model = model;
+            this.view = view;
+            this.init();
+        }
+
+        async init() {
+            this.view.renderDate();
+            this.getParamsFromURL();
+            this.setupEventListeners();
+            await this.loadData();
+        }
+
+        getParamsFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnRecordId = urlParams.get('returnRecordId');
+            const userId = urlParams.get('userId');
+
+            // Lưu returnRecordId
+            if (returnRecordId) {
+                this.returnRecordId = returnRecordId;
+                this.model.setReturnRecordId(returnRecordId);
+            } else {
+                this.view.showAlert('Thiếu thông tin phiếu trả');
+                window.history.back();
+                return;
+            }
+
+            // Lưu userId nếu có (để tương thích ngược)
+            if (userId) {
+                this.model.setUserId(userId);
+            }
+        }
+
+        setupEventListeners() {
+            // Setup back button if exists
+            if (this.view.elements.backBtn) {
+                this.view.elements.backBtn.addEventListener('click', () => {
+                    window.history.back();
+                });
+            }
+
+            // Setup confirm button if exists
+            if (this.view.elements.confirmBtn) {
+                this.view.elements.confirmBtn.addEventListener('click', () => {
+                    this.handleConfirmReturn();
+                });
+            }
+        }
+
+        async loadData() {
+            try {
+                if (!this.returnRecordId) {
+                    this.view.showAlert('Thiếu thông tin phiếu trả');
+                    return;
+                }
+
+                console.log('Loading data for returnRecordId:', this.returnRecordId);
+
+                // Load return record detail from API
+                const returnRecordData = await this.fetchReturnRecordDetail(this.returnRecordId);
+                console.log('Return record data from API:', JSON.stringify(returnRecordData, null, 2));
+                
+                if (!returnRecordData) {
+                    throw new Error('Không nhận được dữ liệu từ API');
+                }
+
+                // Set data to model
+                this.model.setReturnRecordData(returnRecordData);
+                console.log('Model data after set:', {
+                    readerInfo: this.model.readerInfo,
+                    borrowedBooks: this.model.borrowedBooks,
+                    damagedBooks: this.model.damagedBooks,
+                    fees: this.model.getFees()
+                });
+
+                // Verify elements exist
+                console.log('View elements:', {
+                    readerId: this.view.elements.readerId,
+                    readerName: this.view.elements.readerName,
+                    readerEmail: this.view.elements.readerEmail,
+                    readerAddress: this.view.elements.readerAddress
+                });
+
+                // Render all data
+                console.log('Rendering reader info:', this.model.readerInfo);
+                this.view.renderReaderInfo(this.model.readerInfo);
+                
+                console.log('Rendering borrowed books:', this.model.borrowedBooks);
+                this.view.renderBorrowedBooks(this.model.borrowedBooks);
+                
+                console.log('Rendering damaged books:', this.model.damagedBooks);
+                this.view.renderDamagedBooks(this.model.damagedBooks);
+                
+                console.log('Rendering fees:', this.model.getFees());
+                this.view.renderFees(this.model.getFees());
+                
+                console.log('Rendering return date:', returnRecordData.createTime);
+                this.view.renderReturnDate(returnRecordData.createTime);
+
+                console.log('All data rendered successfully');
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                console.error('Error stack:', error.stack);
+                this.view.showAlert('Không thể tải dữ liệu: ' + error.message);
+            }
+        }
+
+        async fetchReturnRecordDetail(returnRecordId) {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/return-record/${encodeURIComponent(returnRecordId)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('Không tìm thấy phiếu trả');
+                }
+                const errorText = await response.text();
+                console.error('API Error:', response.status, errorText);
+                throw new Error(`API Error: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        async handleConfirmReturn() {
+            if (!this.view.confirmAction('Xác nhận trả sách và tạo phiếu phạt?')) {
+                return;
+            }
+
+            try {
+                // Submit all defect reports
+                await this.submitAllDefects();
+
+                // Create return record
+                await this.createReturnRecord();
+
+                // Clear drafts
+                this.clearAllDrafts();
+
+                this.view.showAlert('Đã xác nhận trả sách thành công!');
+                window.location.href = 'index.html';
+
+            } catch (error) {
+                console.error('Error confirming return:', error);
+                this.view.showAlert('Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        }
+
+        async submitAllDefects() {
+            const storagePrefix = `defectDraft_${this.model.userId}_`;
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(storagePrefix)) {
+                    try {
+                        const draft = JSON.parse(localStorage.getItem(key));
+
+                        const response = await fetch(`${CONFIG.API_BASE_URL}/api/defect`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                borrowRecordId: draft.borrowRecordId,
+                                bookId: draft.bookId,
+                                description: draft.description,
+                                severity: draft.severity || 'LOW',
+                                status: draft.status || 'REPORTED',
+                                imageUrls: draft.imageUrls
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Failed to submit defect: ${response.status}`);
+                        }
+                    } catch (error) {
+                        console.error('Error submitting defect:', error);
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        async createReturnRecord() {
+            const fees = this.model.getFees();
+
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/return`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: this.model.userId,
+                    totalFee: fees.total,
+                    cardFee: fees.cardFee,
+                    rentalFee: fees.rentalFee,
+                    damageFee: fees.damageFee,
+                    tax: fees.tax
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to create return record: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        clearAllDrafts() {
+            const storagePrefix = `defectDraft_${this.model.userId}_`;
+            const keysToRemove = [];
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(storagePrefix)) {
+                    keysToRemove.push(key);
+                }
+            }
+
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+        }
+    }
+
+    // ==================== GLOBAL FUNCTIONS ====================
+    function viewDefectDetail(defectId) {
+        alert(`Xem chi tiết lỗi hỏng: ${defectId}`);
+        // Implement modal or navigation to detail page
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        const model = new ReturnRecordModel();
+        const view = new ReturnRecordView();
+        const controller = new ReturnRecordController(model, view);
+    });
+</script>
+</body>
+</html>

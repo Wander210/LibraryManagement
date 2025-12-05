@@ -1,5 +1,6 @@
 package com.example.library.library_service.controller
 
+import com.example.library.library_service.dto.CreateDefectRequest
 import com.example.library.library_service.dto.DefectDetailDto
 import com.example.library.library_service.dto.UpdateDefectStatusRequest
 import com.example.library.library_service.service.DefectService
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -34,6 +36,11 @@ class DefectController(private val defectService: DefectService) {
     @GetMapping("/id/{id}")
     fun listDefectsByIdApi(@PathVariable id: String): ResponseEntity<DefectDetailDto> {
         return ResponseEntity.ok(defectService.findDefectDetailById(id))
+    }
+
+    @PostMapping
+    fun createDefect(@RequestBody request: CreateDefectRequest): ResponseEntity<DefectDetailDto> {
+        return ResponseEntity.ok(defectService.createDefect(request))
     }
 
     @PutMapping("/{id}/status")

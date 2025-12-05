@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Thư Viện</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            background: white;
+            border: none;
+            font-size: 14px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .section-box {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: white;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .section-content {
+            padding: 15px;
+            background: white;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 4px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-area:hover {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+
+        .upload-area.uploading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item.uploading {
+            opacity: 0.5;
+        }
+
+        .preview-item.uploading::after {
+            content: 'Đang tải...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-image:hover {
+            background: #c82333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-cancel:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn-submit {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: #0056b3;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .upload-progress {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e7f3ff;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #007bff;
+        }
+
+        .error-message {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Hệ Thống Quản Lý Thư Viện</h1>
+        <div class="user-info">
+            <div>Nguyễn Văn A</div>
+            <div>Thủ thư</div>
+            <div id="currentDate"></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active">Nhập sách trả</button>
+        <button class="tab">Quản lí lỗi hỏng</button>
+        <button class="tab">Thống kê sách</button>
+    </div>
+
+    <div class="content">
+        <div class="main-layout">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Book Info -->
+                <div class="info-box">
+                    <div class="section-header" style="background: transparent; border: none; padding: 0 0 10px 0;">
+                        Thông tin sách mượn
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mã mượn</span>
+                        <span class="info-value" id="borrowId">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Người mượn</span>
+                        <span class="info-value" id="readerName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Mã sách</span>
+                        <span class="info-value" id="bookId">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Tên sách</span>
+                        <span class="info-value" id="bookTitle">-</span>
+                    </div>
+                </div>
+
+                <!-- Severity Selection -->
+                <div class="section-box">
+                    <div class="section-header">Mức độ nghiêm trọng</div>
+                    <div class="section-content">
+                        <select id="severitySelect" class="form-control">
+                            <option value="">Nhẹ - Có thể sửa chữa dễ dàng</option>
+                            <option value="MEDIUM">Trung bình</option>
+                            <option value="HIGH">Nghiêm trọng</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Status Selection -->
+                <div class="section-box">
+                    <div class="section-header">Trạng thái xử lý</div>
+                    <div class="section-content">
+                        <select id="statusSelect" class="form-control">
+                            <option value="REPORTED">Đã báo cáo</option>
+                            <option value="IN_REPAIR">Đang sửa chữa</option>
+                            <option value="REPAIRED">Đã sửa xong</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="section-box">
+                    <div class="section-header">Lý do hư hỏng</div>
+                    <div class="section-content">
+                        <textarea id="descriptionText" class="form-control"
+                                  placeholder="Mô tả chi tiết tình trạng hư hỏng của sách"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="section-box" style="flex: 1;">
+                    <div class="section-header">Nhận đề tài ảnh lên</div>
+                    <div class="section-content">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">Nhấp để chọn ảnh hoặc kéo thả ảnh vào đây</div>
+                            <div class="upload-hint">Hỗ trợ: JPG, PNG, GIF (Tối đa 5MB)</div>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" multiple>
+                        <div id="uploadStatus"></div>
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-cancel" id="cancelBtn">Hủy</button>
+                    <button class="btn btn-submit" id="submitBtn">Lưu nháp</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== CONFIG ====================
+    const CONFIG = {
+        API_BASE_URL: 'http://localhost:8080',
+        CLOUDINARY: {
+            cloud_name: 'dgqqvzexc',
+            upload_preset: 'LibraryManagement',
+            upload_url: 'https://api.cloudinary.com/v1_1/dgqqvzexc/image/upload'
+        },
+        MAX_FILE_SIZE: 5 * 1024 * 1024,
+        ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/gif'],
+        STORAGE_TYPE: 'localStorage'
+    };
+
+    const Storage = CONFIG.STORAGE_TYPE === 'sessionStorage' ? sessionStorage : localStorage;
+
+    // ==================== MODEL ====================
+    class DefectModel {
+        constructor() {
+            this.bookId = null;
+            this.borrowRecordId = null;
+            this.borrowInfo = null;
+            this.severity = '';
+            this.status = 'REPORTED';
+            this.description = '';
+            this.imageUrls = [];
+            this.userId = null;
+        }
+
+        setBookId(bookId) {
+            this.bookId = bookId;
+        }
+
+        setBorrowRecordId(recordId) {
+            this.borrowRecordId = recordId;
+        }
+
+        setBorrowInfo(info) {
+            this.borrowInfo = info;
+        }
+
+        setSeverity(severity) {
+            this.severity = severity;
+        }
+
+        setStatus(status) {
+            this.status = status;
+        }
+
+        setDescription(description) {
+            this.description = description;
+        }
+
+        setUserId(userId) {
+            this.userId = userId;
+        }
+
+        addImageUrl(url) {
+            this.imageUrls.push(url);
+        }
+
+        removeImageUrl(index) {
+            this.imageUrls.splice(index, 1);
+        }
+
+        getImageUrls() {
+            return this.imageUrls;
+        }
+
+        isValid() {
+            return this.borrowRecordId && this.description.trim() && this.imageUrls.length > 0;
+        }
+
+        toJSON() {
+            return {
+                bookId: this.bookId,
+                borrowRecordId: this.borrowRecordId,
+                description: this.description,
+                severity: this.severity || 'LOW',
+                status: this.status || 'REPORTED',
+                imageUrls: this.imageUrls
+            };
+        }
+
+        fromJSON(json) {
+            if (json.bookId) this.bookId = json.bookId;
+            if (json.borrowRecordId) this.borrowRecordId = json.borrowRecordId;
+            if (json.description) this.description = json.description;
+            if (json.severity) this.severity = json.severity;
+            if (json.status) this.status = json.status;
+            if (json.imageUrls) this.imageUrls = json.imageUrls;
+        }
+    }
+
+    // ==================== VIEW ====================
+    class DefectView {
+        constructor() {
+            this.elements = {
+                currentDate: document.getElementById('currentDate'),
+                borrowId: document.getElementById('borrowId'),
+                readerName: document.getElementById('readerName'),
+                bookId: document.getElementById('bookId'),
+                bookTitle: document.getElementById('bookTitle'),
+                severitySelect: document.getElementById('severitySelect'),
+                statusSelect: document.getElementById('statusSelect'),
+                descriptionText: document.getElementById('descriptionText'),
+                uploadArea: document.getElementById('uploadArea'),
+                fileInput: document.getElementById('fileInput'),
+                imagePreview: document.getElementById('imagePreview'),
+                uploadStatus: document.getElementById('uploadStatus'),
+                cancelBtn: document.getElementById('cancelBtn'),
+                submitBtn: document.getElementById('submitBtn')
+            };
+        }
+
+        renderDate() {
+            const today = new Date();
+            this.elements.currentDate.textContent = today.toLocaleDateString('vi-VN');
+        }
+
+        renderBorrowInfo(info) {
+            if (!info) {
+                this.elements.borrowId.textContent = '-';
+                this.elements.readerName.textContent = '-';
+                this.elements.bookId.textContent = '-';
+                this.elements.bookTitle.textContent = '-';
+                return;
+            }
+
+            this.elements.borrowId.textContent = info.borrowRecordId || '-';
+            this.elements.readerName.textContent = info.readerName || '-';
+            this.elements.bookId.textContent = info.bookId || '-';
+            this.elements.bookTitle.textContent = info.bookTitle || '-';
+        }
+
+        renderImagePreviews(imageUrls) {
+            this.elements.imagePreview.innerHTML = '';
+
+            imageUrls.forEach((url, index) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <img src="${this.escapeHtml(url)}" alt="Preview" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%23ddd%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3EError%3C/text%3E%3C/svg%3E'">
+                    <button class="remove-image" data-index="${index}">×</button>
+                `;
+                this.elements.imagePreview.appendChild(div);
+            });
+        }
+
+        addUploadingPreview(file) {
+            const div = document.createElement('div');
+            div.className = 'preview-item uploading';
+            div.id = `uploading-${Date.now()}`;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                div.innerHTML = `<img src="${e.target.result}" alt="Uploading">`;
+            };
+            reader.readAsDataURL(file);
+
+            this.elements.imagePreview.appendChild(div);
+            return div.id;
+        }
+
+        removeUploadingPreview(id) {
+            const elem = document.getElementById(id);
+            if (elem) elem.remove();
+        }
+
+        showUploadProgress(message) {
+            this.elements.uploadStatus.innerHTML = `<div class="upload-progress">${message}</div>`;
+            this.elements.uploadArea.classList.add('uploading');
+            this.disableButtons(true);
+        }
+
+        hideUploadProgress() {
+            this.elements.uploadStatus.innerHTML = '';
+            this.elements.uploadArea.classList.remove('uploading');
+            this.disableButtons(false);
+        }
+
+        showError(message) {
+            this.elements.uploadStatus.innerHTML = `<div class="error-message">${message}</div>`;
+            setTimeout(() => {
+                this.elements.uploadStatus.innerHTML = '';
+            }, 5000);
+        }
+
+        disableButtons(disabled) {
+            this.elements.submitBtn.disabled = disabled;
+            this.elements.cancelBtn.disabled = disabled;
+        }
+
+        getSeverity() {
+            return this.elements.severitySelect.value;
+        }
+
+        getStatus() {
+            return this.elements.statusSelect.value;
+        }
+
+        getDescription() {
+            return this.elements.descriptionText.value;
+        }
+
+        showAlert(message) {
+            alert(message);
+        }
+
+        confirmAction(message) {
+            return confirm(message);
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
+
+    // ==================== CONTROLLER ====================
+    class DefectController {
+        constructor(model, view) {
+            this.model = model;
+            this.view = view;
+            this.borrowInfoFromParams = null;
+            this.uploadQueue = [];
+            this.isUploading = false;
+            this.init();
+        }
+
+        async init() {
+            this.view.renderDate();
+            this.getParamsFromURL();
+            this.setupEventListeners();
+            this.loadBorrowInfoFromParams();
+            this.loadDraft();
+        }
+
+        getParamsFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('bookId');
+            const borrowRecordId = urlParams.get('borrowRecordId');
+            const borrowBookId = urlParams.get('borrowBookId');
+            const userId = urlParams.get('userId');
+            const bookTitle = urlParams.get('bookTitle') || '';
+            const readerName = urlParams.get('readerName') || '';
+
+            if (!bookId || !borrowRecordId) {
+                this.view.showAlert('Thiếu thông tin sách');
+                window.history.back();
+                return;
+            }
+
+            this.model.setBookId(bookId);
+            this.model.setBorrowRecordId(borrowRecordId);
+            if (userId) {
+                this.model.setUserId(userId);
+            }
+
+            this.borrowInfoFromParams = {
+                borrowRecordId: borrowRecordId,
+                bookId: bookId,
+                borrowBookId: borrowBookId,
+                bookTitle: bookTitle,
+                readerName: readerName
+            };
+        }
+
+        setupEventListeners() {
+            this.view.elements.uploadArea.addEventListener('click', () => {
+                this.view.elements.fileInput.click();
+            });
+
+            this.view.elements.fileInput.addEventListener('change', (e) => {
+                this.handleFileSelect(e.target.files);
+            });
+
+            this.view.elements.uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                this.view.elements.uploadArea.classList.add('dragover');
+            });
+
+            this.view.elements.uploadArea.addEventListener('dragleave', () => {
+                this.view.elements.uploadArea.classList.remove('dragover');
+            });
+
+            this.view.elements.uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                this.view.elements.uploadArea.classList.remove('dragover');
+                this.handleFileSelect(e.dataTransfer.files);
+            });
+
+            this.view.elements.imagePreview.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-image')) {
+                    const index = parseInt(e.target.dataset.index);
+                    this.model.removeImageUrl(index);
+                    this.view.renderImagePreviews(this.model.getImageUrls());
+                    this.saveDraft();
+                }
+            });
+
+            this.view.elements.severitySelect.addEventListener('change', (e) => {
+                this.model.setSeverity(e.target.value);
+                this.saveDraft();
+            });
+
+            this.view.elements.statusSelect.addEventListener('change', (e) => {
+                this.model.setStatus(e.target.value);
+                this.saveDraft();
+            });
+
+            this.view.elements.descriptionText.addEventListener('input', (e) => {
+                this.model.setDescription(e.target.value);
+                this.saveDraft();
+            });
+
+            this.view.elements.cancelBtn.addEventListener('click', () => {
+                this.handleCancel();
+            });
+
+            this.view.elements.submitBtn.addEventListener('click', () => {
+                this.handleSubmit();
+            });
+        }
+
+        loadBorrowInfoFromParams() {
+            if (this.borrowInfoFromParams) {
+                this.model.setBorrowInfo(this.borrowInfoFromParams);
+                this.view.renderBorrowInfo(this.borrowInfoFromParams);
+            }
+        }
+
+        getDraftStorageKey() {
+            if (!this.model.userId || !this.model.borrowRecordId) return null;
+            return `defectDraft_${this.model.userId}_${this.model.borrowRecordId}`;
+        }
+
+        loadDraft() {
+            const storageKey = this.getDraftStorageKey();
+            if (!storageKey) return;
+
+            try {
+                const draftJson = Storage.getItem(storageKey);
+                if (draftJson) {
+                    const draft = JSON.parse(draftJson);
+                    this.model.fromJSON(draft);
+
+                    this.view.elements.descriptionText.value = this.model.description || '';
+                    this.view.elements.severitySelect.value = this.model.severity || '';
+                    this.view.elements.statusSelect.value = this.model.status || 'REPORTED';
+                    this.view.renderImagePreviews(this.model.getImageUrls());
+                }
+            } catch (error) {
+                console.error('Error loading draft:', error);
+            }
+        }
+
+        saveDraft() {
+            const storageKey = this.getDraftStorageKey();
+            if (!storageKey) return;
+
+            try {
+                const draft = this.model.toJSON();
+                Storage.setItem(storageKey, JSON.stringify(draft));
+            } catch (error) {
+                console.error('Error saving draft:', error);
+            }
+        }
+
+        deleteDraft() {
+            const storageKey = this.getDraftStorageKey();
+            if (!storageKey) return;
+
+            try {
+                Storage.removeItem(storageKey);
+            } catch (error) {
+                console.error('Error deleting draft:', error);
+            }
+        }
+
+        async handleFileSelect(files) {
+            if (this.isUploading) {
+                this.view.showError('Đang upload ảnh, vui lòng đợi...');
+                return;
+            }
+
+            const validFiles = [];
+
+            for (let file of files) {
+                if (!CONFIG.ALLOWED_TYPES.includes(file.type)) {
+                    this.view.showError(`Định dạng file "${file.name}" không được hỗ trợ`);
+                    continue;
+                }
+
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    this.view.showError(`File "${file.name}" quá lớn (tối đa 5MB)`);
+                    continue;
+                }
+
+                validFiles.push(file);
+            }
+
+            if (validFiles.length > 0) {
+                await this.uploadFiles(validFiles);
+            }
+
+            this.view.elements.fileInput.value = '';
+        }
+
+        async uploadFiles(files) {
+            this.isUploading = true;
+            this.view.showUploadProgress(`Đang upload ${files.length} ảnh...`);
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const previewId = this.view.addUploadingPreview(file);
+
+                try {
+                    this.view.showUploadProgress(`Đang upload ảnh ${i + 1}/${files.length}: ${file.name}`);
+                    const imageUrl = await this.uploadImageToCloudinary(file);
+
+                    this.model.addImageUrl(imageUrl);
+                    this.view.removeUploadingPreview(previewId);
+                    successCount++;
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                    this.view.removeUploadingPreview(previewId);
+                    failCount++;
+                    this.view.showError(`Không thể upload "${file.name}": ${error.message}`);
+                }
+            }
+
+            this.isUploading = false;
+            this.view.hideUploadProgress();
+            this.view.renderImagePreviews(this.model.getImageUrls());
+            this.saveDraft();
+
+            if (successCount > 0) {
+                this.view.showAlert(`Upload thành công ${successCount} ảnh${failCount > 0 ? `, thất bại ${failCount} ảnh` : ''}`);
+            }
+        }
+
+        async uploadImageToCloudinary(file) {
+            // Tạo FormData để upload file trực tiếp lên Cloudinary
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CONFIG.CLOUDINARY.upload_preset);
+
+            try {
+                const response = await fetch(CONFIG.CLOUDINARY.upload_url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+
+                // Kiểm tra nếu có lỗi từ Cloudinary
+                if (result.error) {
+                    throw new Error(result.error.message || 'Upload failed');
+                }
+
+                // Trả về secure_url (HTTPS URL của ảnh trên CDN Cloudinary)
+                if (!result.secure_url) {
+                    throw new Error('Response không chứa secure_url');
+                }
+
+                return result.secure_url;
+            } catch (error) {
+                console.error('Cloudinary upload error:', error);
+                throw new Error(`Không thể upload lên Cloudinary: ${error.message}`);
+            }
+        }
+
+        handleCancel() {
+            if (this.view.confirmAction('Bạn có muốn xóa bản nháp? Dữ liệu đã nhập sẽ bị mất.')) {
+                this.deleteDraft();
+                if (this.model.userId) {
+                    window.location.href = `ReturnBook.html?userId=${encodeURIComponent(this.model.userId)}`;
+                } else {
+                    window.history.back();
+                }
+            }
+        }
+
+        async handleSubmit() {
+            const description = this.view.getDescription();
+            const severity = this.view.getSeverity();
+            const status = this.view.getStatus();
+
+            this.model.setDescription(description);
+            this.model.setSeverity(severity);
+            this.model.setStatus(status);
+
+            if (!this.model.isValid()) {
+                this.view.showAlert('Vui lòng nhập đầy đủ thông tin bắt buộc: lý do hư hỏng và ít nhất 1 ảnh minh họa.');
+                return;
+            }
+
+            this.saveDraft();
+            
+            // Thêm sách vào danh sách "Đã chọn" trong ReturnBook.html
+            if (this.model.userId && this.borrowInfoFromParams && this.borrowInfoFromParams.borrowBookId) {
+                this.addBookToSelectedBooks();
+            }
+
+            this.view.showAlert('Đã lưu nháp. Sách đã được thêm vào danh sách trả. Bạn sẽ tạo báo cáo khi xác nhận trả sách.');
+
+            if (this.model.userId) {
+                window.location.href = `ReturnBook.html?userId=${encodeURIComponent(this.model.userId)}`;
+            } else {
+                window.history.back();
+            }
+        }
+
+        addBookToSelectedBooks() {
+            if (!this.model.userId || !this.borrowInfoFromParams || !this.borrowInfoFromParams.borrowBookId) {
+                return;
+            }
+
+            try {
+                const storageKey = `returnBooks_${this.model.userId}`;
+                const stored = localStorage.getItem(storageKey);
+                let selectedBooks = stored ? JSON.parse(stored) : [];
+
+                // Kiểm tra xem sách đã có trong danh sách chưa
+                const bookExists = selectedBooks.some(b => b.id === this.borrowInfoFromParams.borrowBookId);
+                
+                if (!bookExists) {
+                    // Thêm sách vào danh sách với thông tin từ borrowInfoFromParams
+                    const bookToAdd = {
+                        id: this.borrowInfoFromParams.borrowBookId,
+                        bookId: this.borrowInfoFromParams.bookId,
+                        borrowRecordId: this.borrowInfoFromParams.borrowRecordId,
+                        bookTitle: this.borrowInfoFromParams.bookTitle,
+                        returnTime: new Date().toISOString(),
+                        // Cần thêm các trường khác nếu có (borrowTime, dueTime, etc.)
+                        // Những trường này sẽ được load lại từ API khi ReturnBook.html render
+                    };
+                    selectedBooks.push(bookToAdd);
+                    localStorage.setItem(storageKey, JSON.stringify(selectedBooks));
+                }
+            } catch (error) {
+                console.error('Error adding book to selected books:', error);
+            }
+        }
+    }
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        const model = new DefectModel();
+        const view = new DefectView();
+        const controller = new DefectController(model, view);
+    });
+</script>
+</body>
+</html>

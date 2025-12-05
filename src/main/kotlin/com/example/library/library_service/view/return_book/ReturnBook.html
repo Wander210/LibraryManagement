@@ -269,6 +269,27 @@
             color: #6c757d;
             font-size: 13px;
         }
+
+        .defect-draft-indicator {
+            display: inline-block;
+            background: #ffc107;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .defect-draft-badge {
+            background: #ffc107;
+            color: #000;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -350,8 +371,13 @@
 <script>
     // ==================== CONFIG ====================
     const CONFIG = {
-        API_BASE_URL: 'http://localhost:8080'
+        API_BASE_URL: 'http://localhost:8080',
+        // Storage type: 'localStorage' (persists after refresh) or 'sessionStorage' (tab only)
+        STORAGE_TYPE: 'localStorage'
     };
+
+    // Storage helper
+    const Storage = CONFIG.STORAGE_TYPE === 'sessionStorage' ? sessionStorage : localStorage;
 
     // ==================== MODEL ====================
     class ReturnBookModel {
@@ -360,6 +386,7 @@
             this.userInfo = null;
             this.borrowedBooks = [];
             this.selectedBooks = [];
+            this.defectDrafts = {}; // Key: borrowRecordId, Value: defect draft object
             this.filterText = '';
             this.filterType = 'all';
         }
@@ -421,6 +448,22 @@
         clearSelections() {
             this.selectedBooks = [];
         }
+
+        getDefectDraft(borrowRecordId) {
+            return this.defectDrafts[borrowRecordId] || null;
+        }
+
+        hasDefectDraft(borrowRecordId) {
+            return !!this.defectDrafts[borrowRecordId];
+        }
+
+        getAllDefectDrafts() {
+            return Object.values(this.defectDrafts);
+        }
+
+        clearDefectDrafts() {
+            this.defectDrafts = {};
+        }
     }
 
     // ==================== VIEW ====================
@@ -462,7 +505,7 @@
             `;
         }
 
-        renderBorrowedBooks(books) {
+        renderBorrowedBooks(books, defectDrafts = {}) {
             if (!books || books.length === 0) {
                 this.elements.borrowedBooksContainer.innerHTML = '<div class="no-data">Không có sách</div>';
                 return;
@@ -481,7 +524,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${books.map(book => this.renderBorrowedBookRow(book)).join('')}
+                        ${books.map(book => this.renderBorrowedBookRow(book, defectDrafts)).join('')}
                     </tbody>
                 </table>
             `;
@@ -489,12 +532,16 @@
             this.elements.borrowedBooksContainer.innerHTML = tableHTML;
         }
 
-        renderBorrowedBookRow(book) {
+        renderBorrowedBookRow(book, defectDrafts = {}) {
             const daysLate = this.calculateDaysLate(book.dueTime);
+            const hasDraft = defectDrafts[book.borrowRecordId];
 
             return `
                 <tr>
-                    <td>${this.escapeHtml(book.bookTitle || '')}</td>
+                    <td>
+                        ${this.escapeHtml(book.bookTitle || '')}
+                        ${hasDraft ? '<span class="defect-draft-indicator">📝 Có bản nháp</span>' : ''}
+                    </td>
                     <td>${this.escapeHtml(book.borrowRecordId || '')}</td>
                     <td>${this.formatDate(book.borrowTime)}</td>
                     <td>${this.formatDate(book.dueTime)}</td>
@@ -509,14 +556,14 @@
                                 data-book-id="${this.escapeHtml(book.bookId || '')}"
                                 data-record-id="${this.escapeHtml(book.borrowRecordId || '')}"
                                 data-action="defect">
-                            Báo cáo hỏng
+                            ${hasDraft ? 'Sửa báo cáo' : 'Báo cáo hỏng'}
                         </button>
                     </td>
                 </tr>
             `;
         }
 
-        renderSelectedBooks(books) {
+        renderSelectedBooks(books, defectDrafts = {}) {
             if (!books || books.length === 0) {
                 this.elements.selectedBooksContainer.innerHTML = '<div class="no-data">Chưa chọn sách nào</div>';
                 return;
@@ -532,11 +579,12 @@
                             <th>Hạn trả</th>
                             <th>Ngày trả</th>
                             <th>Số ngày trễ</th>
+                            <th>Báo cáo hỏng</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${books.map(book => this.renderSelectedBookRow(book)).join('')}
+                        ${books.map(book => this.renderSelectedBookRow(book, defectDrafts)).join('')}
                     </tbody>
                 </table>
                 <div style="padding: 15px; text-align: center;">
@@ -549,9 +597,12 @@
             this.elements.selectedBooksContainer.innerHTML = tableHTML;
         }
 
-        renderSelectedBookRow(book) {
+        renderSelectedBookRow(book, defectDrafts = {}) {
             const returnTime = book.returnTime ? new Date(book.returnTime) : new Date();
             const daysLate = this.calculateDaysLateWithReturnTime(book.dueTime, returnTime);
+            const defectDraft = defectDrafts[book.borrowRecordId];
+            const severityText = defectDraft ? (defectDraft.severity === 'HIGH' ? 'Nghiêm trọng' : 
+                                                 defectDraft.severity === 'MEDIUM' ? 'Trung bình' : 'Nhẹ') : '';
 
             return `
                 <tr>
@@ -567,6 +618,15 @@
                                style="padding: 4px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; width: 100%;">
                     </td>
                     <td>${daysLate > 0 ? daysLate : 0}</td>
+                    <td>
+                        ${defectDraft ? `
+                            <div style="font-size: 11px;">
+                                <span class="defect-draft-badge">📝 Có báo cáo</span><br>
+                                <span style="color: #6c757d;">${this.escapeHtml(severityText)}</span><br>
+                                <span style="color: #6c757d;">${defectDraft.imageUrls && defectDraft.imageUrls.length > 0 ? defectDraft.imageUrls.length + ' ảnh' : 'Không có ảnh'}</span>
+                            </div>
+                        ` : '<span style="color: #6c757d; font-size: 11px;">Chưa có</span>'}
+                    </td>
                     <td>
                         <button class="action-btn btn-defect" 
                                 data-book-id="${this.escapeHtml(book.id || '')}"
@@ -657,6 +717,7 @@
             this.view.renderDate();
             this.getUserIdFromURL();
             this.loadSelectedBooksFromStorage();
+            this.loadDefectDraftsFromStorage();
             this.setupEventListeners();
             await this.loadData();
         }
@@ -671,6 +732,48 @@
                 } catch (e) {
                     console.error('Error loading from localStorage:', e);
                 }
+            }
+        }
+
+        loadDefectDraftsFromStorage() {
+            if (!this.model.userId) return;
+
+            try {
+                // Load all defect drafts for this user
+                const defectDrafts = {};
+                for (let i = 0; i < Storage.length; i++) {
+                    const key = Storage.key(i);
+                    if (key && key.startsWith(`defectDraft_${this.model.userId}_`)) {
+                        try {
+                            const draft = JSON.parse(Storage.getItem(key));
+                            if (draft && draft.borrowRecordId) {
+                                defectDrafts[draft.borrowRecordId] = draft;
+                            }
+                        } catch (e) {
+                            console.error(`Error parsing draft from key ${key}:`, e);
+                        }
+                    }
+                }
+                this.model.defectDrafts = defectDrafts;
+            } catch (e) {
+                console.error('Error loading defect drafts from storage:', e);
+            }
+        }
+
+        clearDefectDraftsFromStorage() {
+            if (!this.model.userId) return;
+
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < Storage.length; i++) {
+                    const key = Storage.key(i);
+                    if (key && key.startsWith(`defectDraft_${this.model.userId}_`)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => Storage.removeItem(key));
+            } catch (e) {
+                console.error('Error clearing defect drafts from storage:', e);
             }
         }
 
@@ -772,9 +875,18 @@
                 const books = await this.fetchBorrowedBooks(this.model.userId);
                 this.model.setBorrowedBooks(books);
                 
-                // Remove selected books that are no longer in borrowed books list
-                const borrowedBookIds = new Set(books.map(b => b.id));
-                this.model.selectedBooks = this.model.selectedBooks.filter(b => borrowedBookIds.has(b.id));
+                // Merge thông tin từ API vào selectedBooks và loại bỏ những sách không còn trong danh sách mượn
+                const borrowedBookMap = new Map(books.map(b => [b.id, b]));
+                this.model.selectedBooks = this.model.selectedBooks
+                    .filter(b => borrowedBookMap.has(b.id))
+                    .map(selectedBook => {
+                        const apiBook = borrowedBookMap.get(selectedBook.id);
+                        // Merge thông tin từ API nhưng giữ returnTime từ selectedBook
+                        return {
+                            ...apiBook,
+                            returnTime: selectedBook.returnTime || apiBook.returnTime || new Date().toISOString()
+                        };
+                    });
                 this.saveSelectedBooksToStorage();
                 
                 this.render();
@@ -892,13 +1004,33 @@
                 // Get librarian ID (hardcoded for now, should be from session)
                 const librarianId = 'LIB001'; // TODO: Get from session
 
+                // Tạo defects trước và lưu defectId vào mỗi book
+                const booksWithDefects = [];
+                for (const book of this.model.selectedBooks) {
+                    const draft = this.model.getDefectDraft(book.borrowRecordId);
+                    let defectId = null;
+                    
+                    if (draft) {
+                        try {
+                            const createdDefect = await this.createDefect(draft);
+                            defectId = createdDefect.id;
+                        } catch (error) {
+                            console.error(`Error creating defect for borrowRecordId ${draft.borrowRecordId}:`, error);
+                            // Tiếp tục với các sách khác ngay cả khi một defect thất bại
+                        }
+                    }
+
+                    booksWithDefects.push({
+                        borrowBookId: book.id,
+                        returnTime: book.returnTime || new Date().toISOString(),
+                        defectId: defectId
+                    });
+                }
+
                 const request = {
                     readerId: this.model.userId,
                     librarianId: librarianId,
-                    books: this.model.selectedBooks.map(book => ({
-                        borrowBookId: book.id,
-                        returnTime: book.returnTime || new Date().toISOString()
-                    }))
+                    books: booksWithDefects
                 };
 
                 const returnRecord = await this.commitReturnBooks(request);
@@ -907,12 +1039,43 @@
                 const storageKey = `returnBooks_${this.model.userId}`;
                 localStorage.removeItem(storageKey);
                 
+                // Clear defect drafts from storage
+                this.clearDefectDraftsFromStorage();
+                this.model.clearDefectDrafts();
+                
                 // Navigate to ReturnRecord page
-                window.location.href = `ReturnRecord.html?returnRecordId=${encodeURIComponent(returnRecord.id)}`;
+                window.location.href = `ReturnRecord.html?returnRecordId=${encodeURIComponent(returnRecord.id)}&userId=${encodeURIComponent(this.model.userId)}`;
             } catch (error) {
                 console.error('Error committing return books:', error);
                 this.view.showAlert('Có lỗi xảy ra khi xác nhận trả sách. Vui lòng thử lại.');
             }
+        }
+
+        async createDefect(draft) {
+            const requestBody = {
+                borrowRecordId: draft.borrowRecordId,
+                bookId: draft.bookId,
+                description: draft.description,
+                severity: draft.severity || 'LOW',
+                status: draft.status || 'REPORTED',
+                imageUrls: draft.imageUrls || []
+            };
+
+            const response = await fetch(`${CONFIG.API_BASE_URL}/api/defect`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
+            }
+
+            return await response.json();
         }
 
         async commitReturnBooks(request) {
@@ -934,14 +1097,23 @@
         }
 
         handleReportDefect(bookId, recordId) {
-            window.location.href = `ReportDefect.html?bookId=${encodeURIComponent(bookId)}&borrowRecordId=${encodeURIComponent(recordId)}`;
+            // Find book info from borrowedBooks
+            const book = this.model.borrowedBooks.find(b => b.bookId === bookId && b.borrowRecordId === recordId);
+            const bookTitle = book ? book.bookTitle : '';
+            const readerName = this.model.userInfo ? this.model.userInfo.fullName : '';
+            const borrowBookId = book ? book.id : '';
+            
+            window.location.href = `CreateDefect.html?bookId=${encodeURIComponent(bookId)}&borrowRecordId=${encodeURIComponent(recordId)}&borrowBookId=${encodeURIComponent(borrowBookId)}&userId=${encodeURIComponent(this.model.userId)}&bookTitle=${encodeURIComponent(bookTitle)}&readerName=${encodeURIComponent(readerName)}`;
         }
 
         render() {
+            // Reload defect drafts in case they were updated
+            this.loadDefectDraftsFromStorage();
+            
             const filteredBooks = this.model.getFilteredBorrowedBooks();
 
-            this.view.renderBorrowedBooks(filteredBooks);
-            this.view.renderSelectedBooks(this.model.selectedBooks);
+            this.view.renderBorrowedBooks(filteredBooks, this.model.defectDrafts);
+            this.view.renderSelectedBooks(this.model.selectedBooks, this.model.defectDrafts);
             
             // Setup confirm button listener after rendering
             const confirmBtn = document.getElementById('confirmBtn');

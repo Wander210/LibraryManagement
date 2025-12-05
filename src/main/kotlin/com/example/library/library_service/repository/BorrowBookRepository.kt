@@ -41,4 +41,13 @@ interface BorrowBookRepository : JpaRepository<BorrowBook, String> {
     """
     )
     fun findByReaderId(readerId: String): List<ReturnBookDto>
+
+    @Query("""
+        SELECT DISTINCT bb FROM BorrowBook bb
+        LEFT JOIN FETCH bb.book
+        LEFT JOIN FETCH bb.borrowRecord
+        LEFT JOIN FETCH bb.defect
+        WHERE bb.returnRecord.id = :returnRecordId
+    """)
+    fun findByReturnRecordId(returnRecordId: String): List<BorrowBook>
 }
